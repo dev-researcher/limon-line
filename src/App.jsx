@@ -1,0 +1,30 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Reservar from "./pages/Reservar";
+import Login from "./pages/Login";
+import Admin from "./pages/Admin";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/reservar" element={<Layout><Reservar /></Layout>} />
+        <Route path="/login" element={<Layout bare><Login /></Layout>} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Layout bare>
+                <Admin />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
