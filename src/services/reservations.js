@@ -1,0 +1,77 @@
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../firebase/config";
+import { SALON } from "../data/salon";
+
+export async function getReservationsByDate(date) {
+  const q = query(
+    collection(db, "reservations_db"),
+    where("businessId", "==", SALON.id),
+    where("date", "==", date)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function getAllReservations() {
+  const q = query(
+    collection(db, "reservations_db"),
+    where("businessId", "==", SALON.id)
+  );
+  const snapshot = await getDocs(q);
+  const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return rows.sort((a, b) => {
+    const da = `${a.date || ""} ${a.hour || a.time || ""}`;
+    const dbv = `${b.date || ""} ${b.hour || b.time || ""}`;
+    return dbv.localeCompare(da);
+  });
+}
+
+export async function createReservation(payload) {
+  const reservationRef = await addDoc(collection(db, "reservations_db"), {
+    businessId: SALON.id,
+    amount: SALON.deposit,
+    createdAt: new Date(),
+    payment: {
+      status: "pending",
+      provider: "sinpe",
+    },
+    pending_confirmation: true,
+    ...payload,
+  });
+  return reservationRef.id;
+}
+
+export async function attachProof(reservationId, proofUrl) {
+  await updateDoc(doc(db, "reservations_db", reservationId), {
+    "payment.proofUrl": proofUrl,
+  });
+}
+
+export async function approvePayment(reservationId) {
+  await updateDoc(doc(db, "reservations_db", reservationId), {
+    "payment.status": "paid",
+    pending_confirmation: false,
+  });
+}
+
+export async function exportReservationsCSV() {
+  const rows = await getAllReservations();
+  let csv = "Fecha,Hora,Cliente,Teléfono,Servicio,Monto,Estado\n";
+  rows.forEach((r) => {
+    csv += `${r.date || ""},${r.hour || r.time || ""},${r.customerName || r.name || ""},${r.phone || ""},${r.service || ""},${r.amount || ""},${r.payment?.status || "pending"}\n`;
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reservas_${SALON.id}.csv`;
+  a.click();
+}
