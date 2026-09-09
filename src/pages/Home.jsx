@@ -1,25 +1,28 @@
 import { Link } from "react-router-dom";
-import { SALON, formatDuration } from "../data/salon";
+import { GALLERY, SALON, formatDuration } from "../data/salon";
 
 export default function Home() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative min-h-[88vh] overflow-hidden">
+      <section className="relative min-h-[88vh] overflow-hidden bg-ink">
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${SALON.image})` }}
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-90 animate-soft-in"
+          style={{
+            backgroundImage: `url(${SALON.heroImage})`,
+            backgroundColor: "#1A1214",
+          }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-ink/25" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(196,91,122,0.35),transparent_45%)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_82%,rgba(196,91,122,0.32),transparent_45%)]" />
 
         <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 lg:justify-center lg:px-8 lg:pb-24">
           <p className="animate-fade-up font-display text-5xl font-semibold leading-none text-white sm:text-6xl md:text-7xl lg:text-8xl">
             {SALON.name}
           </p>
           <h1 className="animate-fade-up-delay mt-5 max-w-xl font-display text-2xl italic text-rose-soft sm:text-3xl md:text-4xl">
-            Belleza con estilo en el corazón de Limón
+            Belleza con estilo en el corazón de La Guaria
           </h1>
           <p className="animate-fade-up-late mt-4 max-w-lg text-base text-white/80 sm:text-lg">
             Cortes, tratamientos y peinados con atención personalizada. Agenda tu cita en minutos.
@@ -28,8 +31,11 @@ export default function Home() {
             <Link to="/reservar" className="btn-primary">
               Reservar ahora
             </Link>
-            <a href="#servicios" className="btn-secondary border-white/30 bg-white/10 text-white hover:border-white hover:text-white">
-              Ver servicios
+            <a
+              href="#galeria"
+              className="btn-secondary border-white/30 bg-white/10 text-white hover:border-white hover:text-white"
+            >
+              Ver trabajos
             </a>
           </div>
         </div>
@@ -63,15 +69,57 @@ export default function Home() {
             <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-rose-soft/40 to-champagne/60 blur-sm" />
             <img
               src={SALON.image}
-              alt={SALON.name}
-              className="relative aspect-[4/5] w-full rounded-[1.75rem] object-cover shadow-xl"
+              alt={`Logo de ${SALON.name}`}
+              className="relative aspect-square w-full rounded-[1.75rem] object-contain bg-white p-6 shadow-xl"
+              loading="eager"
             />
           </div>
         </div>
       </section>
 
+      {/* GALERÍA */}
+      <section id="galeria" className="border-y border-ink/5 bg-white/40">
+        <div className="section-pad">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
+              Galería
+            </p>
+            <h2 className="mt-3 font-display text-4xl font-semibold md:text-5xl">
+              Trabajos que hablan por sí solos
+            </h2>
+            <p className="mt-4 text-ink/65">
+              Imágenes de muestra del estilo y la atención que encuentras en el salón.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+            {GALLERY.map((item, index) => (
+              <figure
+                key={item.caption}
+                className="group relative aspect-square overflow-hidden rounded-2xl bg-ink/5"
+                style={{ animationDelay: `${index * 0.06}s` }}
+              >
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                  width={1200}
+                  height={1200}
+                />
+                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent px-4 pb-4 pt-16">
+                  <span className="font-display text-lg font-semibold text-white md:text-xl">
+                    {item.caption}
+                  </span>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* SERVICIOS */}
-      <section id="servicios" className="border-y border-ink/5 bg-white/50">
+      <section id="servicios" className="bg-white/50">
         <div className="section-pad">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
@@ -85,24 +133,40 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {SALON.services.map((service) => (
-              <article
+              <Link
                 key={service.name}
-                className="group border-b border-ink/10 bg-transparent p-5 transition hover:bg-rose-mist/40"
+                to={`/reservar?servicio=${encodeURIComponent(service.name)}`}
+                className="group block overflow-hidden rounded-2xl bg-cream/40 outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-rose"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-display text-xl font-semibold text-ink group-hover:text-rose-deep">
-                    {service.name}
-                  </h3>
-                  <span className="shrink-0 text-xs font-medium text-ink/45">
-                    {formatDuration(service.duration)}
+                <div className="aspect-square overflow-hidden bg-ink/5">
+                  <img
+                    src={service.image}
+                    alt={`Muestra de ${service.name}`}
+                    className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105"
+                    loading="lazy"
+                    width={1200}
+                    height={1200}
+                  />
+                </div>
+                <div className="border-b border-ink/10 px-1 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-display text-xl font-semibold text-ink transition group-hover:text-rose-deep">
+                      {service.name}
+                    </h3>
+                    <span className="shrink-0 pt-1 text-xs font-medium text-ink/40">
+                      {formatDuration(service.duration)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/60">
+                    {service.description}
+                  </p>
+                  <span className="mt-3 inline-block text-xs font-semibold text-rose-deep">
+                    Reservar →
                   </span>
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-ink/60">
-                  {service.description}
-                </p>
-              </article>
+              </Link>
             ))}
           </div>
 
@@ -116,14 +180,24 @@ export default function Home() {
 
       {/* CONTACTO */}
       <section id="contacto" className="section-pad">
-        <div className="overflow-hidden rounded-[2rem] bg-ink px-6 py-12 text-champagne sm:px-10 lg:px-14">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-end">
+        <div className="relative overflow-hidden rounded-[2rem] bg-ink px-6 py-12 text-champagne sm:px-10 lg:px-14">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-25"
+            style={{
+              backgroundImage: `url(${GALLERY[3].src})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-ink/85" aria-hidden />
+          <div className="relative grid gap-10 lg:grid-cols-2 lg:items-end">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-soft">
                 Contacto
               </p>
               <h2 className="mt-3 font-display text-4xl font-semibold text-white md:text-5xl">
-                Te esperamos en Limón
+                Te esperamos en La Guaria
               </h2>
               <p className="mt-4 max-w-md text-champagne/70">
                 Escríbenos por WhatsApp o reserva en línea. Confirmamos tu cita al verificar el comprobante SINPE.

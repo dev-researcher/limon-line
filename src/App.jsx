@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Reservar from "./pages/Reservar";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import Reportes from "./pages/Reportes";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -19,6 +20,16 @@ export default function App() {
             <ProtectedRoute>
               <Layout bare>
                 <Admin />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reportes"
+          element={
+            <ProtectedRoute>
+              <Layout bare>
+                <Reportes />
               </Layout>
             </ProtectedRoute>
           }

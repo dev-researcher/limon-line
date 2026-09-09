@@ -8,6 +8,7 @@ import {
   exportReservationsCSV,
   getAllReservations,
 } from "../services/reservations";
+import { refreshMonthReport } from "../services/monthlyReports";
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -55,12 +56,20 @@ export default function Admin() {
   });
 
   const handleApprove = async (id) => {
+    const booking = bookings.find((b) => b.id === id);
     await approvePayment(id);
     setBookings((prev) =>
       prev.map((b) =>
         b.id === id ? { ...b, payment: { ...b.payment, status: "paid" } } : b
       )
     );
+    if (booking?.date) {
+      try {
+        await refreshMonthReport(booking.date);
+      } catch {
+        // El reporte se puede regenerar manualmente en /admin/reportes
+      }
+    }
   };
 
   const handleLogout = async () => {
@@ -79,6 +88,9 @@ export default function Admin() {
           <p className="text-ink/55">Panel de reservas</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link to="/admin/reportes" className="btn-primary">
+            Reportes mensuales
+          </Link>
           <button type="button" onClick={() => exportReservationsCSV()} className="btn-secondary">
             Exportar CSV
           </button>
