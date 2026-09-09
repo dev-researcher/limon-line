@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Pegar en Firebase Console → Storage → Reglas
+// o desplegar con: firebase deploy --only storage
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /proofs/{reservationId} {
+      // Cualquiera puede subir el comprobante SINPE de su reserva
+      allow read: if true;
+      allow write: if request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
