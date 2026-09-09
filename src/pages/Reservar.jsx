@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { SALON, formatColon, formatDuration } from "../data/salon";
 import { getAvailableHours, minBookingDate } from "../services/schedule";
 import {
@@ -12,8 +12,13 @@ import { uploadProof } from "../services/uploadProof";
 const STEPS = ["Servicio", "Fecha y hora", "Tus datos", "Pago SINPE"];
 
 export default function Reservar() {
-  const [step, setStep] = useState(0);
-  const [serviceName, setServiceName] = useState("");
+  const [searchParams] = useSearchParams();
+  const preselected = searchParams.get("servicio") || "";
+  const initialService = SALON.services.some((s) => s.name === preselected)
+    ? preselected
+    : "";
+  const [step, setStep] = useState(initialService ? 1 : 0);
+  const [serviceName, setServiceName] = useState(initialService);
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("");
   const [name, setName] = useState("");

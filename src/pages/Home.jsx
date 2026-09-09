@@ -87,9 +87,10 @@ export default function Home() {
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SALON.services.map((service) => (
-              <article
+              <Link
                 key={service.name}
-                className="group border-b border-ink/10 bg-transparent p-5 transition hover:bg-rose-mist/40"
+                to={`/reservar?servicio=${encodeURIComponent(service.name)}`}
+                className="group block border-b border-ink/10 bg-transparent p-5 transition hover:bg-rose-mist/40"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h3 className="font-display text-xl font-semibold text-ink group-hover:text-rose-deep">
@@ -102,7 +103,10 @@ export default function Home() {
                 <p className="mt-2 text-sm leading-relaxed text-ink/60">
                   {service.description}
                 </p>
-              </article>
+                <span className="mt-3 inline-block text-xs font-semibold text-rose-deep opacity-0 transition group-hover:opacity-100">
+                  Reservar →
+                </span>
+              </Link>
             ))}
           </div>
 
