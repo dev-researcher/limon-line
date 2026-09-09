@@ -1,3 +1,44 @@
+import heroSalon from "../assets/hero-salon.jpg";
+import gallery01 from "../assets/gallery/gallery-01-styling.jpg";
+import gallery02 from "../assets/gallery/gallery-02-treatment.jpg";
+import gallery03 from "../assets/gallery/gallery-03-cut.jpg";
+import gallery04 from "../assets/gallery/gallery-04-salon.jpg";
+import gallery05 from "../assets/gallery/gallery-05-shine.jpg";
+import gallery06 from "../assets/gallery/gallery-06-lashes.jpg";
+
+export const GALLERY = [
+  {
+    src: gallery01,
+    alt: "Peinado y styling profesional",
+    caption: "Styling",
+  },
+  {
+    src: gallery02,
+    alt: "Tratamiento capilar nutritivo",
+    caption: "Tratamientos",
+  },
+  {
+    src: gallery03,
+    alt: "Corte de cabello de precisión",
+    caption: "Cortes",
+  },
+  {
+    src: gallery04,
+    alt: "Interior del salón A&A Glam Studio",
+    caption: "Nuestro espacio",
+  },
+  {
+    src: gallery05,
+    alt: "Acabado con brillo y suavidad",
+    caption: "Acabados",
+  },
+  {
+    src: gallery06,
+    alt: "Lifting de pestañas",
+    caption: "Pestañas",
+  },
+];
+
 export const SALON = {
   id: "aaglamstudio",
   name: "A&A Glam Studio",
@@ -12,8 +53,8 @@ export const SALON = {
   whatsapp: "+506 83480179",
   whatsappRaw: "50683480179",
   instagram: "https://www.instagram.com/aa_glamstudio/",
-  image:
-    "https://i.ibb.co/8LSsdFsg/491495349-17927106954064316-9015866029037206504-n.jpg",
+  image: gallery04,
+  heroImage: heroSalon,
   deposit: 5000,
   categories: [
     "Belleza",

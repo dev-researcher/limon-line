@@ -4,6 +4,7 @@ import { SALON } from "../data/salon";
 
 const links = [
   { to: "/", label: "Inicio", end: true },
+  { to: "/#galeria", label: "Galería" },
   { to: "/#servicios", label: "Servicios" },
   { to: "/#contacto", label: "Contacto" },
   { to: "/reservar", label: "Reservar" },
