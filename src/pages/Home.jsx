@@ -5,13 +5,16 @@ export default function Home() {
   return (
     <div>
       {/* HERO */}
-      <section className="relative min-h-[88vh] overflow-hidden">
+      <section className="relative min-h-[88vh] overflow-hidden bg-ink">
         <div
-          className="absolute inset-0 scale-105 bg-cover bg-center animate-soft-in"
-          style={{ backgroundImage: `url(${SALON.heroImage})` }}
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-90 animate-soft-in"
+          style={{
+            backgroundImage: `url(${SALON.heroImage})`,
+            backgroundColor: "#1A1214",
+          }}
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/88 via-ink/60 to-ink/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_82%,rgba(196,91,122,0.32),transparent_45%)]" />
 
         <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 lg:justify-center lg:px-8 lg:pb-24">
@@ -19,7 +22,7 @@ export default function Home() {
             {SALON.name}
           </p>
           <h1 className="animate-fade-up-delay mt-5 max-w-xl font-display text-2xl italic text-rose-soft sm:text-3xl md:text-4xl">
-            Belleza con estilo en el corazón de Limón
+            Belleza con estilo en el corazón de La Guaria
           </h1>
           <p className="animate-fade-up-late mt-4 max-w-lg text-base text-white/80 sm:text-lg">
             Cortes, tratamientos y peinados con atención personalizada. Agenda tu cita en minutos.
@@ -66,8 +69,8 @@ export default function Home() {
             <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-rose-soft/40 to-champagne/60 blur-sm" />
             <img
               src={SALON.image}
-              alt={`Interior de ${SALON.name}`}
-              className="relative aspect-square w-full rounded-[1.75rem] object-cover shadow-xl"
+              alt={`Logo de ${SALON.name}`}
+              className="relative aspect-square w-full rounded-[1.75rem] object-contain bg-white p-6 shadow-xl"
               loading="eager"
             />
           </div>
@@ -181,7 +184,7 @@ export default function Home() {
           <div
             className="pointer-events-none absolute inset-0 opacity-25"
             style={{
-              backgroundImage: `url(${GALLERY[4].src})`,
+              backgroundImage: `url(${GALLERY[3].src})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -194,7 +197,7 @@ export default function Home() {
                 Contacto
               </p>
               <h2 className="mt-3 font-display text-4xl font-semibold text-white md:text-5xl">
-                Te esperamos en Limón
+                Te esperamos en La Guaria
               </h2>
               <p className="mt-4 max-w-md text-champagne/70">
                 Escríbenos por WhatsApp o reserva en línea. Confirmamos tu cita al verificar el comprobante SINPE.

@@ -1,8 +1,6 @@
-import heroSalon from "../assets/hero-salon.jpg";
 import gallery01 from "../assets/gallery/gallery-01-styling.jpg";
 import gallery02 from "../assets/gallery/gallery-02-treatment.jpg";
 import gallery03 from "../assets/gallery/gallery-03-cut.jpg";
-import gallery04 from "../assets/gallery/gallery-04-salon.jpg";
 import gallery05 from "../assets/gallery/gallery-05-shine.jpg";
 import gallery06 from "../assets/gallery/gallery-06-lashes.jpg";
 
@@ -17,13 +15,16 @@ import imgBrillo from "../assets/services/service-brillo.jpg";
 import imgLiso from "../assets/services/service-liso.jpg";
 import imgPestanas from "../assets/services/service-pestanas.jpg";
 
+const LOGO =
+  "https://i.ibb.co/8LSsdFsg/491495349-17927106954064316-9015866029037206504-n.jpg";
+
 export const GALLERY = [
   { src: gallery01, alt: "Peinado y styling profesional", caption: "Styling" },
   { src: gallery02, alt: "Tratamiento capilar nutritivo", caption: "Tratamientos" },
   { src: gallery03, alt: "Corte de cabello de precisión", caption: "Cortes" },
-  { src: gallery04, alt: "Interior del salón A&A Glam Studio", caption: "Nuestro espacio" },
   { src: gallery05, alt: "Acabado con brillo y suavidad", caption: "Acabados" },
   { src: gallery06, alt: "Lifting de pestañas", caption: "Pestañas" },
+  { src: imgLavado, alt: "Lavado y planchado profesional", caption: "Planchado" },
 ];
 
 export const SALON = {
@@ -32,7 +33,7 @@ export const SALON = {
   tagline: "Renueva tu look, realza tu esencia.",
   description:
     "A&A Glam Studio es mucho más que un salón de belleza: es un espacio donde el estilo, el cuidado personal y la atención de calidad se encuentran para transformar tu imagen. Especializados en cortes de cabello modernos, tratamientos capilares personalizados y asesoría de estilo, trabajamos con pasión para resaltar lo mejor de ti.",
-  direction: "Valle la Estrella, La Guaria, Limón, Costa Rica",
+  direction: "Valle la Estrella, La Guaria, Costa Rica",
   schedule: "Lunes a domingo · 9:00 a. m. – 7:00 p. m.",
   sinpePhone: "+506 8348 0179",
   sinpePhoneRaw: "50683480179",
@@ -40,8 +41,8 @@ export const SALON = {
   whatsapp: "+506 83480179",
   whatsappRaw: "50683480179",
   instagram: "https://www.instagram.com/aa_glamstudio/",
-  image: gallery04,
-  heroImage: heroSalon,
+  image: LOGO,
+  heroImage: LOGO,
   deposit: 5000,
   categories: [
     "Belleza",

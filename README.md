@@ -1,6 +1,6 @@
 # A&A Glam Studio
 
-Sitio web del salón **A&A Glam Studio** (Limón, Costa Rica) con reservas en línea y pago por SINPE móvil.
+Sitio web del salón **A&A Glam Studio** (La Guaria, Costa Rica) con reservas en línea y pago por SINPE móvil.
 
 ## Stack
 
