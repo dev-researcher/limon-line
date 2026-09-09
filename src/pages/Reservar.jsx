@@ -172,23 +172,35 @@ export default function Reservar() {
         {step === 0 && (
           <div className="space-y-3 animate-fade-up">
             <label className="label">Servicio</label>
-            <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+            <div className="max-h-[28rem] space-y-2 overflow-y-auto pr-1">
               {SALON.services.map((s) => (
                 <button
                   key={s.name}
                   type="button"
                   onClick={() => setServiceName(s.name)}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                  className={`flex w-full items-center gap-3 rounded-2xl border p-2 text-left transition ${
                     serviceName === s.name
                       ? "border-rose bg-rose-mist/70"
                       : "border-ink/10 hover:border-rose/40"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="font-semibold text-ink">{s.name}</span>
-                    <span className="text-xs text-ink/45">{formatDuration(s.duration)}</span>
+                  <img
+                    src={s.image}
+                    alt=""
+                    className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="font-semibold text-ink">{s.name}</span>
+                      <span className="shrink-0 text-xs text-ink/45">
+                        {formatDuration(s.duration)}
+                      </span>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-sm text-ink/60">{s.description}</p>
                   </div>
-                  <p className="mt-1 text-sm text-ink/60">{s.description}</p>
                 </button>
               ))}
             </div>
@@ -197,9 +209,21 @@ export default function Reservar() {
 
         {step === 1 && (
           <div className="space-y-4 animate-fade-up">
-            <p className="rounded-2xl bg-rose-mist/50 px-4 py-3 text-sm text-ink/70">
-              Servicio: <strong>{selectedService?.name}</strong> · {formatDuration(selectedService?.duration || 0)}
-            </p>
+            <div className="flex items-center gap-3 rounded-2xl bg-rose-mist/50 p-3 text-sm text-ink/70">
+              {selectedService?.image && (
+                <img
+                  src={selectedService.image}
+                  alt=""
+                  className="h-14 w-14 rounded-xl object-cover"
+                  width={56}
+                  height={56}
+                />
+              )}
+              <p>
+                Servicio: <strong>{selectedService?.name}</strong> ·{" "}
+                {formatDuration(selectedService?.duration || 0)}
+              </p>
+            </div>
             <div>
               <label className="label" htmlFor="date">
                 Fecha

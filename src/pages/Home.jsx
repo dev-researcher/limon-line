@@ -130,24 +130,39 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-x-8 gap-y-1 sm:grid-cols-2">
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {SALON.services.map((service) => (
               <Link
                 key={service.name}
                 to={`/reservar?servicio=${encodeURIComponent(service.name)}`}
-                className="group flex items-start justify-between gap-4 border-b border-ink/10 py-5 transition hover:border-rose/30"
+                className="group block overflow-hidden rounded-2xl bg-cream/40 outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-rose"
               >
-                <div>
-                  <h3 className="font-display text-xl font-semibold text-ink transition group-hover:text-rose-deep">
-                    {service.name}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-ink/60">
+                <div className="aspect-square overflow-hidden bg-ink/5">
+                  <img
+                    src={service.image}
+                    alt={`Muestra de ${service.name}`}
+                    className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105"
+                    loading="lazy"
+                    width={1200}
+                    height={1200}
+                  />
+                </div>
+                <div className="border-b border-ink/10 px-1 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-display text-xl font-semibold text-ink transition group-hover:text-rose-deep">
+                      {service.name}
+                    </h3>
+                    <span className="shrink-0 pt-1 text-xs font-medium text-ink/40">
+                      {formatDuration(service.duration)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/60">
                     {service.description}
                   </p>
+                  <span className="mt-3 inline-block text-xs font-semibold text-rose-deep">
+                    Reservar →
+                  </span>
                 </div>
-                <span className="shrink-0 pt-1 text-xs font-medium text-ink/40">
-                  {formatDuration(service.duration)}
-                </span>
               </Link>
             ))}
           </div>
