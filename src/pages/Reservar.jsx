@@ -322,9 +322,12 @@ export default function Reservar() {
                 {formatDuration(selectedService?.duration || 0)}
               </p>
             </div>
+            <p className="text-sm text-ink/55">
+              Primero elige la fecha; luego podrás ver y seleccionar la hora disponible.
+            </p>
             <div>
               <label className="label" htmlFor="date">
-                Fecha
+                Fecha <span className="text-rose-deep">*</span>
               </label>
               <input
                 id="date"
@@ -341,17 +344,14 @@ export default function Reservar() {
                 className="field"
                 required
               />
-              <p className="mt-1.5 text-xs text-ink/50">
-                Primero selecciona la fecha para cargar las horas libres.
-              </p>
             </div>
             <div>
               <label className="label" htmlFor="hour">
-                Hora disponible
+                Hora disponible <span className="text-rose-deep">*</span>
               </label>
               {!date ? (
-                <p className="rounded-2xl border border-rose/20 bg-rose-mist/40 px-4 py-3 text-sm text-rose-deep">
-                  Elige primero la fecha. Después aparecerán las horas disponibles.
+                <p className="rounded-2xl border border-ink/10 bg-white/60 px-4 py-3 text-sm text-ink/50">
+                  Las horas aparecerán cuando elijas la fecha.
                 </p>
               ) : loadingHours ? (
                 <p className="text-sm text-ink/50">Buscando horarios…</p>
