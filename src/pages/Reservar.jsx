@@ -26,6 +26,9 @@ export default function Reservar() {
   const [proofFile, setProofFile] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [loadingHours, setLoadingHours] = useState(false);
+  const [hoursReady, setHoursReady] = useState(false);
+  const [hoursLoadFailed, setHoursLoadFailed] = useState(false);
+  const [hoursRetryKey, setHoursRetryKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -36,29 +39,67 @@ export default function Reservar() {
   );
 
   const availableHours = useMemo(
-    () => getAvailableHours(date, selectedService, reservations),
-    [date, selectedService, reservations]
+    () =>
+      hoursReady && !hoursLoadFailed
+        ? getAvailableHours(date, selectedService, reservations)
+        : [],
+    [date, selectedService, reservations, hoursReady, hoursLoadFailed]
   );
 
   useEffect(() => {
-    if (!date) return;
+    if (!date) {
+      setReservations([]);
+      setHoursReady(false);
+      setHoursLoadFailed(false);
+      setLoadingHours(false);
+      return;
+    }
+
     let cancelled = false;
-    (async () => {
+    let attempt = 0;
+    const maxAttempts = 2;
+
+    const loadHours = async () => {
       setLoadingHours(true);
+      setHoursReady(false);
+      setHoursLoadFailed(false);
       setHour("");
-      try {
-        const rows = await getReservationsByDate(date);
-        if (!cancelled) setReservations(rows);
-      } catch {
-        if (!cancelled) setError("No se pudieron cargar las horas. Intenta de nuevo.");
-      } finally {
-        if (!cancelled) setLoadingHours(false);
+      setError("");
+
+      while (attempt < maxAttempts && !cancelled) {
+        attempt += 1;
+        try {
+          const rows = await getReservationsByDate(date);
+          if (cancelled) return;
+          setReservations(rows);
+          setHoursReady(true);
+          setHoursLoadFailed(false);
+          setLoadingHours(false);
+          return;
+        } catch (err) {
+          console.error("Error cargando horas:", err);
+          if (attempt < maxAttempts) {
+            await new Promise((r) => setTimeout(r, 600));
+          }
+        }
       }
-    })();
+
+      if (!cancelled) {
+        setReservations([]);
+        setHoursReady(false);
+        setHoursLoadFailed(true);
+        setLoadingHours(false);
+        setError(
+          "No se pudieron cargar las horas. Revisa tu conexión y pulsa «Reintentar»."
+        );
+      }
+    };
+
+    loadHours();
     return () => {
       cancelled = true;
     };
-  }, [date]);
+  }, [date, hoursRetryKey]);
 
   const whatsappLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
     `Hola! Reservaré en ${SALON.name} a nombre de ${name}. Servicio: ${serviceName}. Fecha: ${date} a las ${hour}. Adelanto SINPE de ${formatColon(SALON.deposit)}.`
@@ -75,8 +116,26 @@ export default function Reservar() {
         setError("Primero elige la fecha. Luego podrás ver las horas disponibles.");
         return;
       }
+      if (loadingHours) {
+        setError("Espera a que terminen de cargar las horas disponibles.");
+        return;
+      }
+      if (hoursLoadFailed || !hoursReady) {
+        setError(
+          "No se pudieron cargar las horas. Pulsa «Reintentar» antes de continuar."
+        );
+        return;
+      }
+      if (availableHours.length === 0) {
+        setError("No hay horas disponibles para esta fecha. Elige otro día.");
+        return;
+      }
       if (!hour) {
         setError("Selecciona una hora disponible para continuar.");
+        return;
+      }
+      if (!availableHours.includes(hour)) {
+        setError("La hora elegida ya no está disponible. Selecciona otra.");
         return;
       }
     }
@@ -240,6 +299,8 @@ export default function Reservar() {
                 onChange={(e) => {
                   setDate(e.target.value);
                   setHour("");
+                  setHoursReady(false);
+                  setHoursLoadFailed(false);
                   setError("");
                 }}
                 className="field"
@@ -259,11 +320,30 @@ export default function Reservar() {
                 </p>
               ) : loadingHours ? (
                 <p className="text-sm text-ink/50">Buscando horarios…</p>
+              ) : hoursLoadFailed ? (
+                <div className="space-y-3 rounded-2xl border border-rose/30 bg-rose-mist/50 px-4 py-3">
+                  <p className="text-sm text-rose-deep">
+                    No se pudieron cargar las horas. Revisa tu conexión e intenta de nuevo.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError("");
+                      setHoursRetryKey((k) => k + 1);
+                    }}
+                    className="btn-secondary"
+                  >
+                    Reintentar
+                  </button>
+                </div>
               ) : (
                 <select
                   id="hour"
                   value={hour}
-                  onChange={(e) => setHour(e.target.value)}
+                  onChange={(e) => {
+                    setHour(e.target.value);
+                    setError("");
+                  }}
                   className="field"
                   required
                 >
@@ -288,7 +368,7 @@ export default function Reservar() {
                   </optgroup>
                 </select>
               )}
-              {date && !loadingHours && availableHours.length === 0 && (
+              {date && !loadingHours && hoursReady && !hoursLoadFailed && availableHours.length === 0 && (
                 <p className="mt-2 text-sm text-rose-deep">
                   No hay horas disponibles para esta fecha. Prueba otro día.
                 </p>
@@ -384,7 +464,12 @@ export default function Reservar() {
             </button>
           )}
           {step < STEPS.length - 1 ? (
-            <button type="button" onClick={goNext} className="btn-primary">
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={step === 1 && (loadingHours || hoursLoadFailed)}
+              className="btn-primary disabled:opacity-60"
+            >
               Continuar
             </button>
           ) : (

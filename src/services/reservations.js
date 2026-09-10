@@ -11,13 +11,13 @@ import { db } from "../firebase/config";
 import { SALON } from "../data/salon";
 
 export async function getReservationsByDate(date) {
-  const q = query(
-    collection(db, "reservations_db"),
-    where("businessId", "==", SALON.id),
-    where("date", "==", date)
-  );
+  // Consulta por un solo campo para no depender de índice compuesto
+  // (businessId + date). Filtramos el salón en el cliente.
+  const q = query(collection(db, "reservations_db"), where("date", "==", date));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((r) => r.businessId === SALON.id);
 }
 
 export async function getAllReservations() {
