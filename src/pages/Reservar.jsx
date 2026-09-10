@@ -30,6 +30,7 @@ export default function Reservar() {
   const [hoursLoadFailed, setHoursLoadFailed] = useState(false);
   const [hoursRetryKey, setHoursRetryKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
@@ -37,6 +38,8 @@ export default function Reservar() {
     () => SALON.services.find((s) => s.name === serviceName) || null,
     [serviceName]
   );
+
+  const hasProof = Boolean(proofFile);
 
   const availableHours = useMemo(
     () =>
@@ -101,12 +104,36 @@ export default function Reservar() {
     };
   }, [date, hoursRetryKey]);
 
-  const whatsappLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
+  const bookingWhatsAppMessage = useMemo(() => {
+    const proofLine = hasProof
+      ? "Comprobante SINPE: Sí, adjunté imagen en el sitio"
+      : "Comprobante SINPE: No adjunté comprobante";
+    return [
+      `Hola! Quiero reservar en ${SALON.name}.`,
+      "",
+      `Nombre: ${name.trim() || "—"}`,
+      `Teléfono: ${phone.trim() || "—"}`,
+      `Tratamiento: ${serviceName || "—"}`,
+      `Fecha: ${date || "—"}`,
+      `Hora: ${hour || "—"}`,
+      `Adelanto SINPE: ${formatColon(SALON.deposit)}`,
+      proofLine,
+      "",
+      "No pude completar la reserva en el sitio web. ¿Me ayudan a confirmar la cita?",
+    ].join("\n");
+  }, [name, phone, serviceName, date, hour, hasProof]);
+
+  const whatsappFallbackLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
+    bookingWhatsAppMessage
+  )}`;
+
+  const whatsappConfirmLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
     `Hola! Reservaré en ${SALON.name} a nombre de ${name}. Servicio: ${serviceName}. Fecha: ${date} a las ${hour}. Adelanto SINPE de ${formatColon(SALON.deposit)}.`
   )}`;
 
   const goNext = () => {
     setError("");
+    setSubmitFailed(false);
     if (step === 0 && !selectedService) {
       setError("Selecciona un servicio para continuar.");
       return;
@@ -148,7 +175,9 @@ export default function Reservar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitFailed) return;
     setError("");
+    setSubmitFailed(false);
 
     setSubmitting(true);
     try {
@@ -170,7 +199,10 @@ export default function Reservar() {
       setDone(true);
     } catch (err) {
       console.error(err);
-      setError("No se pudo registrar la reserva. Revisa tu conexión e intenta otra vez.");
+      setSubmitFailed(true);
+      setError(
+        "Hubo un problema al guardar la reserva. Completa tu cita por WhatsApp con el mensaje ya listo."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -185,7 +217,7 @@ export default function Reservar() {
             Recibimos tu solicitud. Te confirmamos cuando verifiquemos el pago SINPE.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a href={whatsappLink} target="_blank" rel="noreferrer" className="btn-primary">
+            <a href={whatsappConfirmLink} target="_blank" rel="noreferrer" className="btn-primary">
               Confirmar por WhatsApp
             </a>
             <Link to="/" className="btn-secondary">
@@ -434,7 +466,11 @@ export default function Reservar() {
                 id="proof"
                 type="file"
                 accept="image/*"
-                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  setProofFile(e.target.files?.[0] || null);
+                  setSubmitFailed(false);
+                  setError("");
+                }}
                 className="field file:mr-3 file:rounded-full file:border-0 file:bg-rose file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               />
             </div>
@@ -453,6 +489,7 @@ export default function Reservar() {
               type="button"
               onClick={() => {
                 setError("");
+                setSubmitFailed(false);
                 setStep((s) => s - 1);
               }}
               className="btn-secondary"
@@ -469,6 +506,15 @@ export default function Reservar() {
             >
               Continuar
             </button>
+          ) : submitFailed ? (
+            <a
+              href={whatsappFallbackLink}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-primary"
+            >
+              Hablar por WhatsApp
+            </a>
           ) : (
             <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60">
               {submitting ? "Enviando…" : "Confirmar reserva"}
