@@ -7,7 +7,6 @@ const links = [
   { to: "/#galeria", label: "Galería" },
   { to: "/#servicios", label: "Servicios" },
   { to: "/#contacto", label: "Contacto" },
-  { to: "/reservar", label: "Reservar" },
 ];
 
 export default function Navbar() {
