@@ -170,11 +170,6 @@ export default function Admin() {
                   <td className="px-4 py-3">{b.service}</td>
                   <td className="px-4 py-3">
                     <p>{formatColon(b.amount || SALON.deposit)}</p>
-                    {(b.sinpeReference || b.payment?.reference) && (
-                      <p className="text-xs text-ink/55">
-                        No. SINPE: {b.sinpeReference || b.payment?.reference}
-                      </p>
-                    )}
                     {b.payment?.proofUrl ? (
                       <a
                         href={b.payment.proofUrl}
@@ -194,9 +189,8 @@ export default function Admin() {
                     ) : (
                       <button
                         type="button"
-                        disabled={!b.payment?.proofUrl && !(b.sinpeReference || b.payment?.reference)}
                         onClick={() => handleApprove(b.id)}
-                        className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white disabled:bg-ink/20"
+                        className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white"
                       >
                         Aprobar pago
                       </button>
