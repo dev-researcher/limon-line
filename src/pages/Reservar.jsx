@@ -437,9 +437,6 @@ export default function Reservar() {
                 onChange={(e) => setProofFile(e.target.files?.[0] || null)}
                 className="field file:mr-3 file:rounded-full file:border-0 file:bg-rose file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
               />
-              <p className="mt-1.5 text-xs text-ink/50">
-                Puedes confirmar la reserva aunque no adjuntos el comprobante.
-              </p>
             </div>
           </div>
         )}
