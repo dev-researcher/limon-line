@@ -17,23 +17,23 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_82%,rgba(196,91,122,0.32),transparent_45%)]" />
 
-        <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 lg:justify-center lg:px-8 lg:pb-24">
-          <p className="animate-fade-up font-display text-5xl font-semibold leading-none text-white sm:text-6xl md:text-7xl lg:text-8xl">
+        <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-14 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:justify-center lg:px-8 lg:pb-24">
+          <p className="animate-fade-up break-words font-display text-4xl font-semibold leading-none text-white sm:text-6xl md:text-7xl lg:text-8xl">
             {SALON.name}
           </p>
-          <h1 className="animate-fade-up-delay mt-5 max-w-xl font-display text-2xl italic text-rose-soft sm:text-3xl md:text-4xl">
+          <h1 className="animate-fade-up-delay mt-4 max-w-xl font-display text-xl italic text-rose-soft sm:mt-5 sm:text-3xl md:text-4xl">
             Belleza con estilo en el corazón de La Guaria
           </h1>
-          <p className="animate-fade-up-late mt-4 max-w-lg text-base text-white/80 sm:text-lg">
+          <p className="animate-fade-up-late mt-4 max-w-lg text-sm text-white/80 sm:text-lg">
             Cortes, tratamientos y peinados con atención personalizada. Agenda tu cita en minutos.
           </p>
-          <div className="animate-fade-up-late mt-8 flex flex-wrap gap-3">
-            <Link to="/reservar" className="btn-primary">
+          <div className="animate-fade-up-late mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+            <Link to="/reservar" className="btn-primary w-full sm:w-auto">
               Reservar ahora
             </Link>
             <a
               href="#galeria"
-              className="btn-secondary border-white/30 bg-white/10 text-white hover:border-white hover:text-white"
+              className="btn-secondary w-full border-white/30 bg-white/10 text-white hover:border-white hover:text-white sm:w-auto"
             >
               Ver trabajos
             </a>
@@ -47,10 +47,10 @@ export default function Home() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
             Nuestro espacio
           </p>
-          <h2 className="mt-3 font-display text-4xl font-semibold text-ink md:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-semibold text-ink sm:text-4xl md:text-5xl">
             Un espacio para realzar tu esencia
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-ink/70 md:text-lg">
+          <p className="mt-5 text-sm leading-relaxed text-ink/70 sm:text-base md:text-lg">
             {SALON.description}
           </p>
         </div>
@@ -159,7 +159,7 @@ export default function Home() {
 
       {/* CONTACTO */}
       <section id="contacto" className="section-pad">
-        <div className="relative overflow-hidden rounded-[2rem] bg-ink px-6 py-12 text-champagne sm:px-10 lg:px-14">
+        <div className="relative overflow-hidden rounded-3xl bg-ink px-5 py-10 text-champagne sm:rounded-[2rem] sm:px-10 sm:py-12 lg:px-14">
           <div
             className="pointer-events-none absolute inset-0 opacity-25"
             style={{
@@ -175,14 +175,14 @@ export default function Home() {
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-soft">
                 Contacto
               </p>
-              <h2 className="mt-3 font-display text-4xl font-semibold text-white md:text-5xl">
+              <h2 className="mt-3 font-display text-3xl font-semibold text-white sm:text-4xl md:text-5xl">
                 Te esperamos en La Guaria
               </h2>
-              <p className="mt-4 max-w-md text-champagne/70">
+              <p className="mt-4 max-w-md text-sm text-champagne/70 sm:text-base">
                 Escríbenos por WhatsApp o reserva en línea. Confirmamos tu cita al verificar el comprobante SINPE.
               </p>
             </div>
-            <div className="space-y-4 text-sm sm:text-base">
+            <div className="space-y-4 break-words text-sm sm:text-base">
               <p>
                 <span className="text-champagne/50">Dirección</span>
                 <br />
@@ -205,15 +205,15 @@ export default function Home() {
                   {SALON.whatsapp}
                 </a>
               </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link to="/reservar" className="btn-primary">
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">
+                <Link to="/reservar" className="btn-primary w-full sm:w-auto">
                   Agendar cita
                 </Link>
                 <a
                   href={SALON.instagram}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-secondary border-white/20 bg-transparent text-white hover:border-white hover:text-white"
+                  className="btn-secondary w-full border-white/20 bg-transparent text-white hover:border-white hover:text-white sm:w-auto"
                 >
                   Instagram
                 </a>

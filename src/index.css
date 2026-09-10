@@ -8,6 +8,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -17,6 +19,20 @@ body {
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(244, 230, 216, 0.7), transparent 50%),
     linear-gradient(180deg, #fbf7f4 0%, #f7e8ed 40%, #fbf7f4 100%);
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
 }
 
 ::selection {
@@ -26,19 +42,19 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-rose px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-rose-deep hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-rose px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-rose-deep hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose focus-visible:ring-offset-2 sm:px-7;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/70 px-7 py-3 text-sm font-semibold text-ink backdrop-blur transition duration-300 hover:border-rose hover:text-rose-deep;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-white/70 px-5 py-3 text-sm font-semibold text-ink backdrop-blur transition duration-300 hover:border-rose hover:text-rose-deep sm:px-7;
   }
 
   .section-pad {
-    @apply mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24;
+    @apply mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24;
   }
 
   .field {
-    @apply w-full rounded-2xl border border-ink/10 bg-white/90 px-4 py-3 text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20;
+    @apply w-full max-w-full rounded-2xl border border-ink/10 bg-white/90 px-3 py-3 text-base text-ink outline-none transition focus:border-rose focus:ring-2 focus:ring-rose/20 sm:px-4;
   }
 
   .label {

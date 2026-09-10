@@ -5,18 +5,18 @@ export default function Footer() {
   return (
     <footer className="border-t border-ink/5 bg-ink text-champagne">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-3 lg:px-8">
-        <div>
-          <p className="font-display text-3xl font-semibold">{SALON.name}</p>
+        <div className="min-w-0">
+          <p className="break-words font-display text-2xl font-semibold sm:text-3xl">{SALON.name}</p>
           <p className="mt-3 max-w-xs text-sm text-champagne/70">{SALON.tagline}</p>
         </div>
 
-        <div className="space-y-2 text-sm text-champagne/80">
+        <div className="min-w-0 space-y-2 break-words text-sm text-champagne/80">
           <p className="font-semibold text-champagne">Visítanos</p>
           <p>{SALON.direction}</p>
           <p>{SALON.schedule}</p>
         </div>
 
-        <div className="space-y-3 text-sm">
+        <div className="min-w-0 space-y-3 break-words text-sm">
           <p className="font-semibold text-champagne">Contacto</p>
           <a
             href={`https://wa.me/${SALON.whatsappRaw}`}

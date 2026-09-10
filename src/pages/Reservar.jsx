@@ -116,7 +116,7 @@ export default function Reservar() {
     confirmReadyRef.current = false;
     const t = window.setTimeout(() => {
       confirmReadyRef.current = true;
-    }, 450);
+    }, 700);
     return () => window.clearTimeout(t);
   }, [step]);
 
@@ -247,24 +247,24 @@ export default function Reservar() {
   }
 
   return (
-    <div className="section-pad max-w-3xl">
-      <div className="animate-soft-in text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
+    <div className="section-pad w-full max-w-3xl">
+      <div className="animate-soft-in px-1 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose sm:text-sm">
           Reserva en línea
         </p>
-        <h1 className="mt-2 font-display text-4xl font-semibold md:text-5xl">
+        <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl md:text-5xl">
           Agenda tu cita
         </h1>
-        <p className="mt-3 text-ink/65">
+        <p className="mt-3 text-sm text-ink/65 sm:text-base">
           Adelanto de {formatColon(SALON.deposit)} por SINPE móvil para confirmar tu espacio.
         </p>
       </div>
 
-      <ol className="mt-10 flex flex-wrap items-center justify-center gap-2">
+      <ol className="mt-8 flex flex-wrap items-center justify-center gap-1.5 sm:mt-10 sm:gap-2">
         {STEPS.map((label, i) => (
           <li
             key={label}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:py-1.5 sm:text-xs ${
               i === step
                 ? "bg-rose text-white"
                 : i < step
@@ -281,7 +281,7 @@ export default function Reservar() {
         onSubmit={(e) => {
           e.preventDefault();
         }}
-        className="mt-8 space-y-6 rounded-[2rem] border border-ink/5 bg-white/75 p-6 shadow-sm backdrop-blur sm:p-8"
+        className="mt-6 space-y-5 rounded-3xl border border-ink/5 bg-white/75 p-4 shadow-sm backdrop-blur sm:mt-8 sm:space-y-6 sm:rounded-[2rem] sm:p-6 md:p-8"
       >
         {step === 0 && (
           <div className="space-y-3 animate-fade-up">
@@ -463,21 +463,23 @@ export default function Reservar() {
 
         {step === 3 && (
           <div className="space-y-5 animate-fade-up">
-            <div className="rounded-2xl border border-rose/20 bg-rose-mist/40 p-4 text-sm leading-relaxed text-ink/80">
+            <div className="rounded-2xl border border-rose/20 bg-rose-mist/40 p-3 text-sm leading-relaxed text-ink/80 sm:p-4">
               <p className="font-semibold text-ink">Instrucciones de pago</p>
-              <p className="mt-2">
+              <p className="mt-2 break-words">
                 Transfiere <strong>{formatColon(SALON.deposit)}</strong> por SINPE móvil al número{" "}
-                <strong>{SALON.sinpePhone}</strong> a nombre de <strong>{SALON.sinpeName}</strong>.
+                <strong className="whitespace-nowrap">{SALON.sinpePhone}</strong> a nombre de{" "}
+                <strong>{SALON.sinpeName}</strong>.
               </p>
-              <p className="mt-2">
-                En el detalle escribe tu nombre: <strong>{name || "tu nombre"}</strong>.
+              <p className="mt-2 break-words">
+                En el detalle escribe tu nombre y apellido:{" "}
+                <strong>{name || "tu nombre y apellido"}</strong>.
               </p>
-              <p className="mt-3 text-ink/60">
+              <p className="mt-3 break-words text-ink/60">
                 {selectedService?.name} · {date} · {hour}
               </p>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="label" htmlFor="proof">
                 Imagen del comprobante (opcional)
               </label>
@@ -490,7 +492,7 @@ export default function Reservar() {
                   setSubmitFailed(false);
                   setError("");
                 }}
-                className="field file:mr-3 file:rounded-full file:border-0 file:bg-rose file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                className="field max-w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-rose file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white sm:file:px-4 sm:file:text-sm"
               />
             </div>
           </div>
@@ -502,7 +504,7 @@ export default function Reservar() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">
           {step > 0 && (
             <button
               type="button"
@@ -511,7 +513,7 @@ export default function Reservar() {
                 setSubmitFailed(false);
                 setStep((s) => s - 1);
               }}
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
             >
               Atrás
             </button>
@@ -521,7 +523,7 @@ export default function Reservar() {
               type="button"
               onClick={goNext}
               disabled={step === 1 && (loadingHours || hoursLoadFailed)}
-              className="btn-primary disabled:opacity-60"
+              className="btn-primary w-full disabled:opacity-60 sm:w-auto"
             >
               Continuar
             </button>
@@ -530,7 +532,7 @@ export default function Reservar() {
               href={whatsappFallbackLink}
               target="_blank"
               rel="noreferrer"
-              className="btn-primary"
+              className="btn-primary w-full sm:w-auto"
             >
               Hablar por WhatsApp
             </a>
@@ -539,7 +541,7 @@ export default function Reservar() {
               type="button"
               disabled={submitting}
               onClick={handleConfirm}
-              className="btn-primary disabled:opacity-60"
+              className="btn-primary w-full disabled:opacity-60 sm:w-auto"
             >
               {submitting ? "Enviando…" : "Confirmar reserva"}
             </button>
