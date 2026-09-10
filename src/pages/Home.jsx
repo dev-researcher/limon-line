@@ -54,16 +54,6 @@ export default function Home() {
             <p className="mt-5 text-base leading-relaxed text-ink/70 md:text-lg">
               {SALON.description}
             </p>
-            <ul className="mt-8 flex flex-wrap gap-2">
-              {SALON.categories.map((cat) => (
-                <li
-                  key={cat}
-                  className="rounded-full border border-rose/20 bg-rose-mist/60 px-3 py-1 text-xs font-medium text-rose-deep"
-                >
-                  {cat}
-                </li>
-              ))}
-            </ul>
           </div>
           <div className="relative">
             <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-rose-soft/40 to-champagne/60 blur-sm" />

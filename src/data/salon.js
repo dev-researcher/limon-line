@@ -44,14 +44,6 @@ export const SALON = {
   image: LOGO,
   heroImage: LOGO,
   deposit: 5000,
-  categories: [
-    "Belleza",
-    "Tratamientos de cabello",
-    "Coloración",
-    "Maquillaje",
-    "Extensiones",
-    "Peinados para eventos",
-  ],
   operationSchedule: {
     monday: { open: "09:00", close: "19:00" },
     tuesday: { open: "09:00", close: "19:00" },
