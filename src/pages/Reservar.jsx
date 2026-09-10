@@ -103,9 +103,13 @@ export default function Reservar() {
   }, [date, hoursRetryKey]);
 
   const bookingWhatsAppMessage = useMemo(() => {
-    const proofLine = hasProof
-      ? "Comprobante SINPE: Sí, adjunté imagen en el sitio"
-      : "Comprobante SINPE: No adjunté comprobante";
+    const paymentLines = hasProof
+      ? [
+          `Adelanto SINPE: ${formatColon(SALON.deposit)}`,
+          "Comprobante SINPE: Sí, adjunté imagen en el sitio",
+        ]
+      : ["Adelanto SINPE: No di adelanto"];
+
     return [
       `Hola! Quiero reservar en ${SALON.name}.`,
       "",
@@ -114,8 +118,7 @@ export default function Reservar() {
       `Tratamiento: ${serviceName || "—"}`,
       `Fecha: ${date || "—"}`,
       `Hora: ${hour || "—"}`,
-      `Adelanto SINPE: ${formatColon(SALON.deposit)}`,
-      proofLine,
+      ...paymentLines,
       "",
       "No pude completar la reserva en el sitio web. ¿Me ayudan a confirmar la cita?",
     ].join("\n");
