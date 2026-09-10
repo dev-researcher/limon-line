@@ -37,6 +37,9 @@ export default function Login() {
           </Link>
           <h1 className="mt-4 text-lg font-semibold text-ink/80">Administración</h1>
           <p className="mt-1 text-sm text-ink/50">Inicia sesión para gestionar reservas</p>
+          <p className="mt-3 rounded-xl bg-rose-mist/50 px-3 py-2 text-xs text-ink/60">
+            Usuario: <strong>admin@aaglamstudio.com</strong>
+          </p>
         </div>
 
         <div>

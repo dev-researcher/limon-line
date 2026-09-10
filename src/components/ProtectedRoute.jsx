@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/config";
+
+const ADMIN_EMAILS = ["admin@aaglamstudio.com"];
 
 export default function ProtectedRoute({ children }) {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (current) => {
-      setUser(current);
+    const unsub = onAuthStateChanged(auth, async (current) => {
+      if (current && !ADMIN_EMAILS.includes((current.email || "").toLowerCase())) {
+        // Evita que la cuenta técnica de reservas entre al panel
+        await signOut(auth);
+        setUser(null);
+      } else {
+        setUser(current);
+      }
       setReady(true);
     });
     return unsub;

@@ -37,9 +37,17 @@ Si **Confirmar reserva** falla siempre, las reglas de Firebase no están publica
 4. Reemplaza todo con el contenido de `storage.rules` → **Publicar**
 
 Después de publicar, el cliente puede completar la cita **con o sin** imagen de comprobante. WhatsApp solo se ofrece si el servidor falla de verdad.
+## Acceso administración
+
+- URL: `/login`
+- Correo: `admin@aaglamstudio.com`
+- Contraseña: `GlamStudio2026!`
+
+(Cámbiala luego en Firebase → Authentication → Users si quieres.)
+
 ### Auth admin
 
-Crea un usuario en **Authentication → Email/password** para entrar a `/login` y usar `/admin` + `/admin/reportes`.
+El panel `/admin` solo acepta el correo admin de arriba.
 
 ### Colecciones
 

@@ -9,19 +9,20 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { SALON } from "../data/salon";
+import { ensureBookingSession } from "./bookingAuth";
 
 export async function getReservationsByDate(date) {
   // Consulta por un solo campo para no depender de índice compuesto
   // (businessId + date). Filtramos el salón en el cliente.
   try {
+    await ensureBookingSession();
     const q = query(collection(db, "reservations_db"), where("date", "==", date));
     const snapshot = await getDocs(q);
     return snapshot.docs
       .map((d) => ({ id: d.id, ...d.data() }))
       .filter((r) => r.businessId === SALON.id);
   } catch (err) {
-    // Reglas de Firebase aún no publicadas → permission-denied.
-    // Devolvemos [] para poder mostrar horas del horario local.
+    // Reglas restrictivas → devolvemos [] y mostramos horas del horario local.
     console.error("getReservationsByDate:", err?.code || err);
     if (err?.code === "permission-denied") return [];
     throw err;
@@ -29,6 +30,7 @@ export async function getReservationsByDate(date) {
 }
 
 export async function getAllReservations() {
+  await ensureBookingSession();
   const q = query(
     collection(db, "reservations_db"),
     where("businessId", "==", SALON.id)
@@ -43,6 +45,7 @@ export async function getAllReservations() {
 }
 
 export async function createReservation(payload) {
+  const user = await ensureBookingSession();
   const reservationRef = await addDoc(collection(db, "reservations_db"), {
     businessId: SALON.id,
     amount: Number(SALON.deposit),
@@ -56,6 +59,7 @@ export async function createReservation(payload) {
     phone: payload.phone || "",
     hasProof: Boolean(payload.hasProof),
     createdAt: new Date(),
+    createdBy: user?.uid || null,
     payment: {
       status: "pending",
       provider: "sinpe",
