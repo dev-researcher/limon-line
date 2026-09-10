@@ -171,12 +171,14 @@ export default function Reservar() {
       setError("Completa tu nombre y teléfono.");
       return;
     }
+    setSubmitFailed(false);
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (submitFailed) return;
+    // Solo confirmar en el último paso (evita envíos con Enter antes de tiempo)
+    if (step !== STEPS.length - 1) return;
     setError("");
     setSubmitFailed(false);
 
