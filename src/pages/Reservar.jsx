@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SALON, formatColon, formatDuration } from "../data/salon";
 import { getAvailableHours, minBookingDate } from "../services/schedule";
@@ -33,6 +33,8 @@ export default function Reservar() {
   const [submitFailed, setSubmitFailed] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const prevStepRef = useRef(step);
+  const confirmReadyRef = useRef(true);
 
   const selectedService = useMemo(
     () => SALON.services.find((s) => s.name === serviceName) || null,
@@ -101,6 +103,22 @@ export default function Reservar() {
       cancelled = true;
     };
   }, [date, hoursRetryKey]);
+
+  // Al llegar al paso de pago: botón Confirmar limpio (sin error/WA de entrada).
+  // Además evita el "clic fantasma" del Continuar sobre el nuevo botón.
+  useEffect(() => {
+    const cameToPayment = step === STEPS.length - 1 && prevStepRef.current !== step;
+    prevStepRef.current = step;
+    if (!cameToPayment) return;
+
+    setSubmitFailed(false);
+    setError("");
+    confirmReadyRef.current = false;
+    const t = window.setTimeout(() => {
+      confirmReadyRef.current = true;
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [step]);
 
   const bookingWhatsAppMessage = useMemo(() => {
     const sinpeLine = hasProof
@@ -172,13 +190,12 @@ export default function Reservar() {
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Solo confirmar en el último paso (evita envíos con Enter antes de tiempo)
+  const handleConfirm = async () => {
     if (step !== STEPS.length - 1) return;
+    if (!confirmReadyRef.current || submitting) return;
+
     setError("");
     setSubmitFailed(false);
-
     setSubmitting(true);
     try {
       const reservationId = await createReservation({
@@ -261,7 +278,9 @@ export default function Reservar() {
       </ol>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
         className="mt-8 space-y-6 rounded-[2rem] border border-ink/5 bg-white/75 p-6 shadow-sm backdrop-blur sm:p-8"
       >
         {step === 0 && (
@@ -516,7 +535,12 @@ export default function Reservar() {
               Hablar por WhatsApp
             </a>
           ) : (
-            <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60">
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={handleConfirm}
+              className="btn-primary disabled:opacity-60"
+            >
               {submitting ? "Enviando…" : "Confirmar reserva"}
             </button>
           )}
