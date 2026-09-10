@@ -43,27 +43,16 @@ export default function Home() {
 
       {/* SOBRE EL SALÓN */}
       <section className="section-pad" id="nosotros">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
-              Nuestro espacio
-            </p>
-            <h2 className="mt-3 font-display text-4xl font-semibold text-ink md:text-5xl">
-              Un espacio para realzar tu esencia
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-ink/70 md:text-lg">
-              {SALON.description}
-            </p>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-rose-soft/40 to-champagne/60 blur-sm" />
-            <img
-              src={SALON.image}
-              alt={`Logo de ${SALON.name}`}
-              className="relative aspect-square w-full rounded-[1.75rem] object-contain bg-white p-6 shadow-xl"
-              loading="eager"
-            />
-          </div>
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-rose">
+            Nuestro espacio
+          </p>
+          <h2 className="mt-3 font-display text-4xl font-semibold text-ink md:text-5xl">
+            Un espacio para realzar tu esencia
+          </h2>
+          <p className="mt-5 text-base leading-relaxed text-ink/70 md:text-lg">
+            {SALON.description}
+          </p>
         </div>
       </section>
 
