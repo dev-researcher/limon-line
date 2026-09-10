@@ -113,12 +113,12 @@ export default function Reservar() {
     return [
       `Hola! Quiero reservar en ${SALON.name}.`,
       "",
-      `Nombre: ${name.trim() || "—"}`,
+      `Nombre y apellido: ${name.trim() || "—"}`,
       `Teléfono: ${phone.trim() || "—"}`,
       `Tratamiento: ${serviceName || "—"}`,
+      ...paymentLines,
       `Fecha: ${date || "—"}`,
       `Hora: ${hour || "—"}`,
-      ...paymentLines,
       "",
       "No pude completar la reserva en el sitio web. ¿Me ayudan a confirmar la cita?",
     ].join("\n");
@@ -168,7 +168,7 @@ export default function Reservar() {
       }
     }
     if (step === 2 && (!name.trim() || !phone.trim())) {
-      setError("Completa tu nombre y teléfono.");
+      setError("Completa tu nombre y apellido, y tu teléfono.");
       return;
     }
     setSubmitFailed(false);
@@ -416,7 +416,7 @@ export default function Reservar() {
           <div className="space-y-4 animate-fade-up">
             <div>
               <label className="label" htmlFor="name">
-                Nombre completo
+                Nombre y apellido <span className="text-rose-deep">*</span>
               </label>
               <input
                 id="name"
@@ -424,7 +424,7 @@ export default function Reservar() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="field"
-                placeholder="Tu nombre"
+                placeholder="Nombre y apellido"
                 required
               />
             </div>
