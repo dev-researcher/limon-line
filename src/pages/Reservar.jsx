@@ -24,6 +24,7 @@ export default function Reservar() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [proofFile, setProofFile] = useState(null);
+  const [sinpeReference, setSinpeReference] = useState("");
   const [reservations, setReservations] = useState([]);
   const [loadingHours, setLoadingHours] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -61,7 +62,7 @@ export default function Reservar() {
   }, [date]);
 
   const whatsappLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
-    `Hola! Reservaré en ${SALON.name} a nombre de ${name}. Servicio: ${serviceName}. Fecha: ${date} a las ${hour}. Ya envié el comprobante SINPE de ${formatColon(SALON.deposit)}.`
+    `Hola! Reservaré en ${SALON.name} a nombre de ${name}. Servicio: ${serviceName}. Fecha: ${date} a las ${hour}. Adelanto SINPE de ${formatColon(SALON.deposit)}${sinpeReference.trim() ? `. No. de comprobante: ${sinpeReference.trim()}` : ""}.`
   )}`;
 
   const goNext = () => {
@@ -70,9 +71,15 @@ export default function Reservar() {
       setError("Selecciona un servicio para continuar.");
       return;
     }
-    if (step === 1 && (!date || !hour)) {
-      setError("Elige fecha y hora disponibles.");
-      return;
+    if (step === 1) {
+      if (!date) {
+        setError("Primero elige la fecha. Luego podrás ver las horas disponibles.");
+        return;
+      }
+      if (!hour) {
+        setError("Selecciona una hora disponible para continuar.");
+        return;
+      }
     }
     if (step === 2 && (!name.trim() || !phone.trim())) {
       setError("Completa tu nombre y teléfono.");
@@ -84,8 +91,8 @@ export default function Reservar() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!proofFile) {
-      setError("Sube el comprobante del SINPE para confirmar tu reserva.");
+    if (!sinpeReference.trim() && !proofFile) {
+      setError("Indica el número de comprobante SINPE o adjunta la imagen del pago.");
       return;
     }
 
@@ -100,10 +107,18 @@ export default function Reservar() {
         time: hour,
         service: selectedService.name,
         duration: selectedService.duration,
+        sinpeReference: sinpeReference.trim() || null,
+        payment: {
+          status: "pending",
+          provider: "sinpe",
+          reference: sinpeReference.trim() || null,
+        },
       });
 
-      const proofUrl = await uploadProof(proofFile, reservationId);
-      await attachProof(reservationId, proofUrl);
+      if (proofFile) {
+        const proofUrl = await uploadProof(proofFile, reservationId);
+        await attachProof(reservationId, proofUrl);
+      }
       setDone(true);
     } catch (err) {
       console.error(err);
@@ -119,7 +134,9 @@ export default function Reservar() {
         <div className="animate-fade-up rounded-[2rem] border border-rose/20 bg-white/80 p-8 text-center shadow-sm backdrop-blur">
           <p className="font-display text-4xl font-semibold text-ink">¡Reserva enviada!</p>
           <p className="mt-4 text-ink/70">
-            Recibimos tu solicitud y el comprobante. Te confirmamos cuando verifiquemos el pago SINPE.
+            Recibimos tu solicitud
+            {sinpeReference.trim() ? ` con el no. de comprobante ${sinpeReference.trim()}` : ""}
+            . Te confirmamos cuando verifiquemos el pago SINPE.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a href={whatsappLink} target="_blank" rel="noreferrer" className="btn-primary">
@@ -233,16 +250,27 @@ export default function Reservar() {
                 type="date"
                 min={minBookingDate()}
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setHour("");
+                  setError("");
+                }}
                 className="field"
                 required
               />
+              <p className="mt-1.5 text-xs text-ink/50">
+                Primero selecciona la fecha para cargar las horas libres.
+              </p>
             </div>
             <div>
               <label className="label" htmlFor="hour">
                 Hora disponible
               </label>
-              {loadingHours ? (
+              {!date ? (
+                <p className="rounded-2xl border border-rose/20 bg-rose-mist/40 px-4 py-3 text-sm text-rose-deep">
+                  Elige primero la fecha. Después aparecerán las horas disponibles.
+                </p>
+              ) : loadingHours ? (
                 <p className="text-sm text-ink/50">Buscando horarios…</p>
               ) : (
                 <select
@@ -332,8 +360,25 @@ export default function Reservar() {
             </div>
 
             <div>
+              <label className="label" htmlFor="sinpeReference">
+                No. de comprobante SINPE
+              </label>
+              <input
+                id="sinpeReference"
+                type="text"
+                value={sinpeReference}
+                onChange={(e) => setSinpeReference(e.target.value)}
+                className="field"
+                placeholder="Ej. 123456789"
+              />
+              <p className="mt-1.5 text-xs text-ink/50">
+                Anota el número de referencia del SINPE para verificar tu pago.
+              </p>
+            </div>
+
+            <div>
               <label className="label" htmlFor="proof">
-                Comprobante SINPE (imagen)
+                Imagen del comprobante (opcional)
               </label>
               <input
                 id="proof"
@@ -341,8 +386,10 @@ export default function Reservar() {
                 accept="image/*"
                 onChange={(e) => setProofFile(e.target.files?.[0] || null)}
                 className="field file:mr-3 file:rounded-full file:border-0 file:bg-rose file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
-                required
               />
+              <p className="mt-1.5 text-xs text-ink/50">
+                Puedes continuar solo con el número de comprobante; la imagen es opcional.
+              </p>
             </div>
           </div>
         )}
