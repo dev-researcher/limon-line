@@ -88,13 +88,11 @@ export default function Reservar() {
       }
 
       if (!cancelled) {
+        // Último recurso: mostrar horas del horario aunque no se lean reservas
         setReservations([]);
-        setHoursReady(false);
-        setHoursLoadFailed(true);
+        setHoursReady(true);
+        setHoursLoadFailed(false);
         setLoadingHours(false);
-        setError(
-          "No se pudieron cargar las horas. Revisa tu conexión y pulsa «Reintentar»."
-        );
       }
     };
 
