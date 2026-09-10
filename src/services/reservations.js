@@ -45,14 +45,22 @@ export async function getAllReservations() {
 export async function createReservation(payload) {
   const reservationRef = await addDoc(collection(db, "reservations_db"), {
     businessId: SALON.id,
-    amount: SALON.deposit,
+    amount: Number(SALON.deposit),
+    date: payload.date,
+    service: payload.service,
+    hour: payload.hour || payload.time || "",
+    time: payload.hour || payload.time || "",
+    duration: payload.duration || 1,
+    customerName: payload.customerName || payload.name || "",
+    name: payload.name || payload.customerName || "",
+    phone: payload.phone || "",
+    hasProof: Boolean(payload.hasProof),
     createdAt: new Date(),
     payment: {
       status: "pending",
       provider: "sinpe",
     },
     pending_confirmation: true,
-    ...payload,
   });
   return reservationRef.id;
 }

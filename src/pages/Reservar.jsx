@@ -207,18 +207,29 @@ export default function Reservar() {
         time: hour,
         service: selectedService.name,
         duration: selectedService.duration,
+        hasProof: Boolean(proofFile),
       });
 
+      // El comprobante es opcional: si falla la subida, la reserva igual queda guardada.
       if (proofFile) {
-        const proofUrl = await uploadProof(proofFile, reservationId);
-        await attachProof(reservationId, proofUrl);
+        try {
+          const proofUrl = await uploadProof(proofFile, reservationId);
+          await attachProof(reservationId, proofUrl);
+        } catch (proofErr) {
+          console.error("Comprobante no subido:", proofErr);
+        }
       }
       setDone(true);
     } catch (err) {
       console.error(err);
       setSubmitFailed(true);
+      const denied =
+        err?.code === "permission-denied" ||
+        String(err?.message || "").toLowerCase().includes("permission");
       setError(
-        "Hubo un problema al guardar la reserva. Completa tu cita por WhatsApp con el mensaje ya listo."
+        denied
+          ? "No se pudo guardar la reserva en el servidor (permisos de Firebase). Puedes reintentar o confirmar por WhatsApp."
+          : "Hubo un problema al guardar la reserva. Puedes reintentar o confirmar por WhatsApp."
       );
     } finally {
       setSubmitting(false);
@@ -527,24 +538,27 @@ export default function Reservar() {
             >
               Continuar
             </button>
-          ) : submitFailed ? (
-            <a
-              href={whatsappFallbackLink}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-primary w-full sm:w-auto"
-            >
-              Hablar por WhatsApp
-            </a>
           ) : (
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={handleConfirm}
-              className="btn-primary w-full disabled:opacity-60 sm:w-auto"
-            >
-              {submitting ? "Enviando…" : "Confirmar reserva"}
-            </button>
+            <>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleConfirm}
+                className="btn-primary w-full disabled:opacity-60 sm:w-auto"
+              >
+                {submitting ? "Enviando…" : "Confirmar reserva"}
+              </button>
+              {submitFailed && (
+                <a
+                  href={whatsappFallbackLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary w-full sm:w-auto"
+                >
+                  Hablar por WhatsApp
+                </a>
+              )}
+            </>
           )}
         </div>
       </form>

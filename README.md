@@ -27,22 +27,16 @@ Despliega la carpeta `dist` (Vercel listo con `vercel.json`).
 
 El sitio público muestra la info del salón sin base de datos. **Reservas, comprobantes SINPE y reportes** usan el proyecto Firebase `sistema-reservas-1c8ef`.
 
-### Desplegar reglas
+### ⚠️ Obligatorio: publicar reglas
 
-En la [consola de Firebase](https://console.firebase.google.com/) del proyecto:
+Si **Confirmar reserva** falla siempre, las reglas de Firebase no están publicadas.
 
-1. **Firestore → Reglas**: pega el contenido de `firestore.rules` → Publicar
-2. **Storage → Reglas**: pega el contenido de `storage.rules` → Publicar
+1. Abre [Firestore → Reglas](https://console.firebase.google.com/project/sistema-reservas-1c8ef/firestore/rules)
+2. Reemplaza todo con el contenido de `firestore.rules` → **Publicar**
+3. Abre [Storage → Reglas](https://console.firebase.google.com/project/sistema-reservas-1c8ef/storage/rules)
+4. Reemplaza todo con el contenido de `storage.rules` → **Publicar**
 
-O con CLI:
-
-```bash
-npm i -g firebase-tools
-firebase login
-firebase use sistema-reservas-1c8ef
-firebase deploy --only firestore:rules,storage
-```
-
+Después de publicar, el cliente puede completar la cita **con o sin** imagen de comprobante. WhatsApp solo se ofrece si el servidor falla de verdad.
 ### Auth admin
 
 Crea un usuario en **Authentication → Email/password** para entrar a `/login` y usar `/admin` + `/admin/reportes`.

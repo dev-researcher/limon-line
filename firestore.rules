@@ -1,22 +1,15 @@
 rules_version = '2';
 
-// Pegar en Firebase Console → Firestore → Reglas
-// o desplegar con: firebase deploy --only firestore:rules
+// IMPORTANTE: hay que PUBLICAR estas reglas en Firebase Console.
+// Sin publicarlas, Confirmar reserva siempre falla con permission-denied.
+//
+// Firestore → Reglas → pegar esto → Publicar
+// https://console.firebase.google.com/project/sistema-reservas-1c8ef/firestore/rules
 
 service cloud.firestore {
   match /databases/{database}/documents {
     function isSignedIn() {
       return request.auth != null;
-    }
-
-    function isSalonReservation() {
-      return request.resource.data.businessId == 'aaglamstudio';
-    }
-
-    function onlyProofOrPendingFields() {
-      // Cliente público: solo puede adjuntar comprobante tras crear la reserva
-      return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['payment', 'pending_confirmation']);
     }
 
     match /business_db/{businessId} {
@@ -26,16 +19,20 @@ service cloud.firestore {
 
     match /reservations_db/{reservationId} {
       allow read: if true;
-      allow create: if isSalonReservation()
-        && request.resource.data.keys().hasAll(['businessId', 'date', 'service'])
+      // Cliente público puede crear la cita (con o sin comprobante)
+      allow create: if request.resource.data.businessId == 'aaglamstudio'
+        && request.resource.data.keys().hasAll(['businessId', 'date', 'service', 'amount'])
         && request.resource.data.amount is number
+        && request.resource.data.amount > 0
         && request.resource.data.amount <= 50000;
-      allow update: if isSignedIn() || onlyProofOrPendingFields();
+      // Admin aprueba; cliente solo puede adjuntar comprobante
+      allow update: if isSignedIn()
+        || request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['payment', 'pending_confirmation']);
       allow delete: if isSignedIn();
     }
 
     match /monthly_reports/{reportId} {
-      // Consulta y generación desde el panel admin
       allow read: if isSignedIn();
       allow create, update: if isSignedIn()
         && request.resource.data.businessId == 'aaglamstudio';
