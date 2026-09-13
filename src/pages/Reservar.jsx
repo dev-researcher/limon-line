@@ -36,6 +36,7 @@ export default function Reservar() {
   const [done, setDone] = useState(false);
   const prevStepRef = useRef(step);
   const confirmReadyRef = useRef(true);
+  const [confirmReady, setConfirmReady] = useState(true);
 
   const selectedService = useMemo(
     () => SALON.services.find((s) => s.name === serviceName) || null,
@@ -114,9 +115,11 @@ export default function Reservar() {
     setSubmitFailed(false);
     setError("");
     confirmReadyRef.current = false;
+    setConfirmReady(false);
     const t = window.setTimeout(() => {
       confirmReadyRef.current = true;
-    }, 700);
+      setConfirmReady(true);
+    }, 450);
     return () => window.clearTimeout(t);
   }, [step]);
 
@@ -306,7 +309,7 @@ export default function Reservar() {
   const primaryDisabled =
     (step === 0 && !selectedService) ||
     (step === 1 && (loadingHours || hoursLoadFailed)) ||
-    (step === STEPS.length - 1 && submitting);
+    (step === STEPS.length - 1 && (submitting || !confirmReady));
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-40 pt-6 sm:px-6 sm:pb-44 sm:pt-10">
@@ -426,6 +429,46 @@ export default function Reservar() {
               <label className="label" htmlFor="date">
                 Fecha <span className="text-rose-deep">*</span>
               </label>
+              <div className="mb-2 flex flex-wrap gap-2">
+                {[
+                  { label: "Hoy", value: minBookingDate() },
+                  {
+                    label: "Mañana",
+                    value: (() => {
+                      const d = new Date(`${minBookingDate()}T12:00:00`);
+                      d.setDate(d.getDate() + 1);
+                      return d.toISOString().slice(0, 10);
+                    })(),
+                  },
+                  {
+                    label: "Pasado mañana",
+                    value: (() => {
+                      const d = new Date(`${minBookingDate()}T12:00:00`);
+                      d.setDate(d.getDate() + 2);
+                      return d.toISOString().slice(0, 10);
+                    })(),
+                  },
+                ].map((opt) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => {
+                      setDate(opt.value);
+                      setHour("");
+                      setHoursReady(false);
+                      setHoursLoadFailed(false);
+                      setError("");
+                    }}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                      date === opt.value
+                        ? "bg-rose text-white"
+                        : "bg-white text-ink/70 ring-1 ring-ink/10 hover:ring-rose/40"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
               <input
                 id="date"
                 type="date"
