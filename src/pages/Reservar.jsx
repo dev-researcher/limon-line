@@ -624,9 +624,8 @@ export default function Reservar() {
           </p>
         )}
 
-        {/* Acciones dentro de la tarjeta: sin barra fija sobre el footer */}
         {step > 0 && (
-          <div className="mt-6 flex flex-col gap-3 border-t border-ink/5 pt-5 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col gap-3 border-t border-ink/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
               onClick={goBack}
@@ -639,12 +638,12 @@ export default function Reservar() {
                 type="button"
                 onClick={goNext}
                 disabled={primaryDisabled}
-                className="btn-primary w-full disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[10rem]"
+                className="btn-primary w-full disabled:opacity-60 sm:w-auto sm:min-w-[11rem]"
               >
                 Continuar
               </button>
             ) : (
-              <div className="flex w-full flex-col gap-3 sm:ml-auto sm:w-auto sm:flex-row">
+              <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                 <button
                   type="button"
                   disabled={primaryDisabled}
