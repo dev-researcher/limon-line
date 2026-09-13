@@ -143,8 +143,22 @@ export default function Reservar() {
     bookingWhatsAppMessage
   )}`;
 
+  const whatsappConfirmMessage = useMemo(() => {
+    const sinpePart = hasProof
+      ? `Adelanto SINPE: sí, adjunté el comprobante (${formatColon(SALON.deposit)}).`
+      : "Adelanto SINPE: no di adelanto.";
+
+    return [
+      `Hola! Quiero confirmar mi reserva en ${SALON.name}.`,
+      `Nombre y apellido: ${name.trim() || "—"}`,
+      sinpePart,
+      `Servicio: ${serviceName || "—"}`,
+      `Fecha: ${date || "—"} a las ${hour || "—"}.`,
+    ].join(" ");
+  }, [name, serviceName, date, hour, hasProof]);
+
   const whatsappConfirmLink = `https://wa.me/${SALON.whatsappRaw}?text=${encodeURIComponent(
-    `Hola! Reservaré en ${SALON.name} a nombre de ${name}. Servicio: ${serviceName}. Fecha: ${date} a las ${hour}. Adelanto SINPE de ${formatColon(SALON.deposit)}.`
+    whatsappConfirmMessage
   )}`;
 
   const goNext = () => {
