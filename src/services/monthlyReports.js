@@ -10,6 +10,7 @@ import {
 import { db } from "../firebase/config";
 import { SALON } from "../data/salon";
 import { getAllReservations } from "./reservations";
+import { downloadExcelCsv } from "../utils/csv";
 
 const MONTH_NAMES = [
   "Enero",
@@ -193,14 +194,17 @@ export async function refreshMonthReport(dateStr) {
 
 export function exportMonthlyReportCSV(report) {
   if (!report) return;
-  let csv = "Fecha,Hora,Cliente,Teléfono,Servicio,Monto,Estado\n";
-  (report.bookings || []).forEach((r) => {
-    csv += `${r.date},${r.hour},${r.customerName},${r.phone},${r.service},${r.amount},${r.paymentStatus}\n`;
-  });
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `reporte_${report.monthKey}_${SALON.id}.csv`;
-  a.click();
+  downloadExcelCsv(
+    `reporte_${report.monthKey}_${SALON.id}.csv`,
+    ["Fecha", "Hora", "Cliente", "Teléfono", "Servicio", "Monto", "Estado"],
+    (report.bookings || []).map((r) => [
+      r.date || "",
+      r.hour || "",
+      r.customerName || "",
+      r.phone || "",
+      r.service || "",
+      r.amount || "",
+      r.paymentStatus || "",
+    ])
+  );
 }

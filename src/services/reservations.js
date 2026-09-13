@@ -10,6 +10,7 @@ import {
 import { db, auth } from "../firebase/config";
 import { SALON } from "../data/salon";
 import { ensureBookingSession } from "./bookingAuth";
+import { downloadExcelCsv } from "../utils/csv";
 
 async function backupCreate(reservation) {
   try {
@@ -162,14 +163,17 @@ export async function approvePayment(reservationId) {
 
 export async function exportReservationsCSV() {
   const rows = await getAllReservations();
-  let csv = "Fecha,Hora,Cliente,Teléfono,Servicio,Monto,Estado\n";
-  rows.forEach((r) => {
-    csv += `${r.date || ""},${r.hour || r.time || ""},${r.customerName || r.name || ""},${r.phone || ""},${r.service || ""},${r.amount || ""},${r.payment?.status || "pending"}\n`;
-  });
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `reservas_${SALON.id}.csv`;
-  a.click();
+  downloadExcelCsv(
+    `reservas_${SALON.id}.csv`,
+    ["Fecha", "Hora", "Cliente", "Teléfono", "Servicio", "Monto", "Estado"],
+    rows.map((r) => [
+      r.date || "",
+      r.hour || r.time || "",
+      r.customerName || r.name || "",
+      r.phone || "",
+      r.service || "",
+      r.amount || "",
+      r.payment?.status || "pending",
+    ])
+  );
 }
