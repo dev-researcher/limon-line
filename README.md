@@ -40,7 +40,7 @@ Después de publicar, el cliente puede completar la cita **con o sin** imagen de
 ## Acceso administración
 
 - URL: `/login`
-- Correo: `admin@aaglamstudio.com`
+- Correo: `elenaportuguez@icloud.com`
 - Contraseña: `GlamStudio2026!`
 
 (Cámbiala luego en Firebase → Authentication → Users si quieres.)
