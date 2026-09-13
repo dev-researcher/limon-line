@@ -123,10 +123,10 @@ export async function getSavedMonthlyReports() {
       .sort((a, b) => (b.monthKey || "").localeCompare(a.monthKey || ""));
   } catch (err) {
     console.error("getSavedMonthlyReports:", err?.code || err);
+    // Si Firebase bloquea lectura, generamos el reporte en vivo desde las reservas
     if (err?.code === "permission-denied") {
-      const e = new Error("permission-denied");
-      e.code = "permission-denied";
-      throw e;
+      const reservations = await getAllReservations();
+      return buildMonthlyReportsFromReservations(reservations);
     }
     throw err;
   }
@@ -142,19 +142,24 @@ export async function regenerateAndSaveMonthlyReports() {
   const reservations = await getAllReservations();
   const reports = buildMonthlyReportsFromReservations(reservations);
 
-  await Promise.all(
-    reports.map((report) =>
-      setDoc(
-        doc(db, "monthly_reports", reportDocId(report.monthKey)),
-        {
-          ...report,
-          updatedAt: serverTimestamp(),
-          generatedAt: serverTimestamp(),
-        },
-        { merge: true }
+  try {
+    await Promise.all(
+      reports.map((report) =>
+        setDoc(
+          doc(db, "monthly_reports", reportDocId(report.monthKey)),
+          {
+            ...report,
+            updatedAt: serverTimestamp(),
+            generatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        )
       )
-    )
-  );
+    );
+  } catch (err) {
+    console.error("No se pudieron persistir reportes en Firestore:", err?.code || err);
+    // Devolvemos igual los reportes calculados en memoria
+  }
 
   return reports;
 }

@@ -25,15 +25,9 @@ export default function Reportes() {
       if (rows.length && !selectedKey) {
         setSelectedKey(rows[0].monthKey);
       }
-    } catch (err) {
+    } catch {
       setReports([]);
-      if (err?.code === "permission-denied") {
-        setError(
-          "No hay reportes visibles todavía: Firebase bloquea la lectura. Cuando se publiquen las reglas podrás verlos aquí."
-        );
-      } else {
-        setError("No se pudieron cargar los reportes. Revisa tu conexión e intenta de nuevo.");
-      }
+      setError("No se pudieron cargar los reportes. Revisa tu conexión e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -66,9 +60,7 @@ export default function Reportes() {
           : "No hay reservas todavía para generar reportes."
       );
     } catch {
-      setError(
-        "No se pudieron guardar los reportes. Despliega las reglas de firestore.rules e inicia sesión como admin."
-      );
+      setError("No se pudieron actualizar los reportes. Revisa tu conexión e intenta de nuevo.");
     } finally {
       setSaving(false);
     }

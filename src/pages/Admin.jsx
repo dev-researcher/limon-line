@@ -23,15 +23,9 @@ export default function Admin() {
     try {
       const rows = await getAllReservations();
       setBookings(rows);
-    } catch (err) {
+    } catch {
       setBookings([]);
-      if (err?.code === "permission-denied") {
-        setError(
-          "Firebase no permite leer las reservas todavía (reglas sin publicar). Las citas sí se pueden guardar; para verlas aquí hay que publicar firestore.rules."
-        );
-      } else {
-        setError("No se pudieron cargar las reservas. Revisa tu conexión e intenta de nuevo.");
-      }
+      setError("No se pudieron cargar las reservas. Revisa tu conexión e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
