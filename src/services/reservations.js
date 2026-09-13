@@ -11,6 +11,7 @@ import { db, auth } from "../firebase/config";
 import { SALON } from "../data/salon";
 import { ensureBookingSession } from "./bookingAuth";
 import { downloadExcelCsv } from "../utils/csv";
+import { PAYMENT_STATUS, paymentStatusLabel } from "../utils/paymentStatus";
 
 async function backupCreate(reservation) {
   try {
@@ -149,7 +150,7 @@ export async function attachProof(reservationId, proofUrl) {
 export async function approvePayment(reservationId) {
   try {
     await updateDoc(doc(db, "reservations_db", reservationId), {
-      "payment.status": "paid",
+      "payment.status": PAYMENT_STATUS.paid,
       pending_confirmation: false,
     });
   } catch (err) {
@@ -157,7 +158,23 @@ export async function approvePayment(reservationId) {
   }
   await backupUpdate(reservationId, {
     pending_confirmation: false,
-    payment: { status: "paid", provider: "sinpe" },
+    payment: { status: PAYMENT_STATUS.paid, provider: "sinpe" },
+  });
+}
+
+/** Cita confirmada aunque la persona no envió adelanto SINPE. */
+export async function confirmWithoutSinpe(reservationId) {
+  try {
+    await updateDoc(doc(db, "reservations_db", reservationId), {
+      "payment.status": PAYMENT_STATUS.confirmedNoSinpe,
+      pending_confirmation: false,
+    });
+  } catch (err) {
+    console.error("confirmWithoutSinpe firestore:", err?.code || err);
+  }
+  await backupUpdate(reservationId, {
+    pending_confirmation: false,
+    payment: { status: PAYMENT_STATUS.confirmedNoSinpe, provider: "sinpe" },
   });
 }
 
@@ -173,7 +190,7 @@ export async function exportReservationsCSV() {
       r.phone || "",
       r.service || "",
       r.amount || "",
-      r.payment?.status || "pending",
+      paymentStatusLabel(r.payment?.status),
     ])
   );
 }

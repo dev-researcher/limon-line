@@ -7,6 +7,10 @@ import {
   getSavedMonthlyReports,
   regenerateAndSaveMonthlyReports,
 } from "../services/monthlyReports";
+import {
+  PAYMENT_STATUS,
+  paymentStatusLabel,
+} from "../utils/paymentStatus";
 
 export default function Reportes() {
   const [reports, setReports] = useState([]);
@@ -165,9 +169,13 @@ export default function Reportes() {
                   </button>
                 </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <Stat label="Reservas" value={selected.totalReservations} />
                   <Stat label="Pagadas" value={selected.paidCount} />
+                  <Stat
+                    label="Sin SINPE"
+                    value={selected.confirmedNoSinpeCount || 0}
+                  />
                   <Stat label="Pendientes" value={selected.pendingCount} />
                   <Stat
                     label="Ingresos confirmados"
@@ -238,10 +246,18 @@ export default function Reportes() {
                         <td className="px-4 py-3">{b.service}</td>
                         <td className="px-4 py-3">{formatColon(b.amount)}</td>
                         <td className="px-4 py-3">
-                          {b.paymentStatus === "paid" ? (
-                            <span className="font-semibold text-emerald-700">Pagado</span>
+                          {b.paymentStatus === PAYMENT_STATUS.paid ? (
+                            <span className="font-semibold text-emerald-700">
+                              {paymentStatusLabel(b.paymentStatus)}
+                            </span>
+                          ) : b.paymentStatus === PAYMENT_STATUS.confirmedNoSinpe ? (
+                            <span className="font-semibold text-amber-700">
+                              {paymentStatusLabel(b.paymentStatus)}
+                            </span>
                           ) : (
-                            <span className="text-rose-deep">Pendiente</span>
+                            <span className="text-rose-deep">
+                              {paymentStatusLabel(b.paymentStatus)}
+                            </span>
                           )}
                         </td>
                       </tr>

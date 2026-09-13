@@ -11,6 +11,10 @@ import { db } from "../firebase/config";
 import { SALON } from "../data/salon";
 import { getAllReservations } from "./reservations";
 import { downloadExcelCsv } from "../utils/csv";
+import {
+  PAYMENT_STATUS,
+  paymentStatusLabel,
+} from "../utils/paymentStatus";
 
 const MONTH_NAMES = [
   "Enero",
@@ -53,6 +57,7 @@ function emptyReport(monthKey) {
     totalReservations: 0,
     paidCount: 0,
     pendingCount: 0,
+    confirmedNoSinpeCount: 0,
     totalRevenue: 0,
     pendingRevenue: 0,
     services: {},
@@ -72,13 +77,15 @@ export function buildMonthlyReportsFromReservations(reservations) {
     const report = byMonth.get(key);
 
     const amount = Number(r.amount) || SALON.deposit || 0;
-    const paid = r.payment?.status === "paid";
+    const status = r.payment?.status || PAYMENT_STATUS.pending;
     const service = r.service || "Sin servicio";
 
     report.totalReservations += 1;
-    if (paid) {
+    if (status === PAYMENT_STATUS.paid) {
       report.paidCount += 1;
       report.totalRevenue += amount;
+    } else if (status === PAYMENT_STATUS.confirmedNoSinpe) {
+      report.confirmedNoSinpeCount += 1;
     } else {
       report.pendingCount += 1;
       report.pendingRevenue += amount;
@@ -204,7 +211,7 @@ export function exportMonthlyReportCSV(report) {
       r.phone || "",
       r.service || "",
       r.amount || "",
-      r.paymentStatus || "",
+      paymentStatusLabel(r.paymentStatus),
     ])
   );
 }

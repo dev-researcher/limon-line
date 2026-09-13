@@ -5,10 +5,25 @@ import { auth } from "../firebase/config";
 import { SALON, formatColon } from "../data/salon";
 import {
   approvePayment,
+  confirmWithoutSinpe,
   exportReservationsCSV,
   getAllReservations,
 } from "../services/reservations";
 import { refreshMonthReport } from "../services/monthlyReports";
+import {
+  PAYMENT_STATUS,
+  paymentStatusLabel,
+} from "../utils/paymentStatus";
+
+function StatusBadge({ status }) {
+  if (status === PAYMENT_STATUS.paid) {
+    return <span className="font-semibold text-emerald-700">{paymentStatusLabel(status)}</span>;
+  }
+  if (status === PAYMENT_STATUS.confirmedNoSinpe) {
+    return <span className="font-semibold text-amber-700">{paymentStatusLabel(status)}</span>;
+  }
+  return <span className="text-rose-deep">{paymentStatusLabel(status)}</span>;
+}
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -16,6 +31,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -38,40 +54,57 @@ export default function Admin() {
   const stats = useMemo(() => {
     let paid = 0;
     let pending = 0;
+    let noSinpe = 0;
     let revenue = 0;
     bookings.forEach((b) => {
-      if (b.payment?.status === "paid") {
+      const status = b.payment?.status || PAYMENT_STATUS.pending;
+      if (status === PAYMENT_STATUS.paid) {
         paid += 1;
         revenue += b.amount || 0;
+      } else if (status === PAYMENT_STATUS.confirmedNoSinpe) {
+        noSinpe += 1;
       } else {
         pending += 1;
       }
     });
-    return { paid, pending, revenue, total: bookings.length };
+    return { paid, pending, noSinpe, revenue, total: bookings.length };
   }, [bookings]);
 
   const visible = bookings.filter((b) => {
-    if (filter === "paid") return b.payment?.status === "paid";
-    if (filter === "pending") return b.payment?.status !== "paid";
+    const status = b.payment?.status || PAYMENT_STATUS.pending;
+    if (filter === "paid") return status === PAYMENT_STATUS.paid;
+    if (filter === "pending") return status === PAYMENT_STATUS.pending;
+    if (filter === "no_sinpe") return status === PAYMENT_STATUS.confirmedNoSinpe;
     return true;
   });
 
-  const handleApprove = async (id) => {
+  const applyStatus = async (id, status, action) => {
     const booking = bookings.find((b) => b.id === id);
-    await approvePayment(id);
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.id === id ? { ...b, payment: { ...b.payment, status: "paid" } } : b
-      )
-    );
-    if (booking?.date) {
-      try {
-        await refreshMonthReport(booking.date);
-      } catch {
-        // El reporte se puede regenerar manualmente en /admin/reportes
+    setBusyId(id);
+    try {
+      await action(id);
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === id ? { ...b, payment: { ...b.payment, status }, pending_confirmation: false } : b
+        )
+      );
+      if (booking?.date) {
+        try {
+          await refreshMonthReport(booking.date);
+        } catch {
+          // El reporte se puede regenerar manualmente en /admin/reportes
+        }
       }
+    } finally {
+      setBusyId("");
     }
   };
+
+  const handleApprove = (id) =>
+    applyStatus(id, PAYMENT_STATUS.paid, approvePayment);
+
+  const handleConfirmNoSinpe = (id) =>
+    applyStatus(id, PAYMENT_STATUS.confirmedNoSinpe, confirmWithoutSinpe);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -101,7 +134,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-ink/5 bg-white/80 p-5">
           <p className="text-sm text-ink/50">Reservas</p>
           <p className="mt-1 font-display text-3xl font-semibold">{stats.total}</p>
@@ -109,6 +142,10 @@ export default function Admin() {
         <div className="rounded-2xl border border-ink/5 bg-white/80 p-5">
           <p className="text-sm text-ink/50">Pendientes</p>
           <p className="mt-1 font-display text-3xl font-semibold text-rose-deep">{stats.pending}</p>
+        </div>
+        <div className="rounded-2xl border border-ink/5 bg-white/80 p-5">
+          <p className="text-sm text-ink/50">Sin SINPE</p>
+          <p className="mt-1 font-display text-3xl font-semibold text-amber-700">{stats.noSinpe}</p>
         </div>
         <div className="rounded-2xl border border-ink/5 bg-white/80 p-5">
           <p className="text-sm text-ink/50">Ingresos confirmados</p>
@@ -121,6 +158,7 @@ export default function Admin() {
           { id: "all", label: "Todas" },
           { id: "pending", label: "Pendientes" },
           { id: "paid", label: "Pagadas" },
+          { id: "no_sinpe", label: "Sin SINPE" },
         ].map((f) => (
           <button
             key={f.id}
@@ -159,48 +197,63 @@ export default function Admin() {
               </tr>
             </thead>
             <tbody>
-              {visible.map((b) => (
-                <tr key={b.id} className="border-t border-ink/5">
-                  <td className="px-4 py-3">
-                    <p className="font-medium">{b.customerName || b.name}</p>
-                    <p className="text-xs text-ink/45">{b.phone || "—"}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    {b.date || "—"}
-                    <br />
-                    <span className="text-ink/55">{b.hour || b.time || ""}</span>
-                  </td>
-                  <td className="px-4 py-3">{b.service}</td>
-                  <td className="px-4 py-3">
-                    <p>{formatColon(b.amount || SALON.deposit)}</p>
-                    {b.payment?.proofUrl ? (
-                      <a
-                        href={b.payment.proofUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-rose-deep underline"
-                      >
-                        Ver comprobante
-                      </a>
-                    ) : (
-                      <span className="text-xs text-ink/35">Sin imagen</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {b.payment?.status === "paid" ? (
-                      <span className="font-semibold text-emerald-700">Pagado</span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleApprove(b.id)}
-                        className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white"
-                      >
-                        Aprobar pago
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {visible.map((b) => {
+                const status = b.payment?.status || PAYMENT_STATUS.pending;
+                const pending = status === PAYMENT_STATUS.pending;
+                return (
+                  <tr key={b.id} className="border-t border-ink/5">
+                    <td className="px-4 py-3">
+                      <p className="font-medium">{b.customerName || b.name}</p>
+                      <p className="text-xs text-ink/45">{b.phone || "—"}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      {b.date || "—"}
+                      <br />
+                      <span className="text-ink/55">{b.hour || b.time || ""}</span>
+                    </td>
+                    <td className="px-4 py-3">{b.service}</td>
+                    <td className="px-4 py-3">
+                      <p>{formatColon(b.amount || SALON.deposit)}</p>
+                      {b.payment?.proofUrl ? (
+                        <a
+                          href={b.payment.proofUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-rose-deep underline"
+                        >
+                          Ver comprobante
+                        </a>
+                      ) : (
+                        <span className="text-xs text-ink/35">Sin imagen</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {pending ? (
+                        <div className="flex flex-col gap-2 sm:min-w-[11rem]">
+                          <button
+                            type="button"
+                            disabled={busyId === b.id}
+                            onClick={() => handleApprove(b.id)}
+                            className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                          >
+                            Aprobar pago
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busyId === b.id}
+                            onClick={() => handleConfirmNoSinpe(b.id)}
+                            className="rounded-full border border-amber-600/40 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 disabled:opacity-60"
+                          >
+                            Confirmar sin SINPE
+                          </button>
+                        </div>
+                      ) : (
+                        <StatusBadge status={status} />
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
