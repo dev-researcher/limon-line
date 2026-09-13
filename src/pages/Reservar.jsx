@@ -299,20 +299,21 @@ export default function Reservar() {
 
   const stepHint =
     step === 0
-      ? "Toca un servicio: pasarás automáticamente a fecha y hora."
+      ? "Toca un servicio para pasar a fecha y hora."
       : step === 1
-        ? "Elige la fecha y luego la hora. Continuar queda fijo abajo."
+        ? "Elige la fecha y luego la hora disponible."
         : step === 2
-          ? "Completa tus datos. Continuar queda fijo abajo."
-          : "El comprobante es opcional. Confirma abajo cuando estés lista.";
+          ? "Completa tus datos para continuar."
+          : "El comprobante es opcional. Confirma cuando estés lista.";
 
   const primaryDisabled =
     (step === 0 && !selectedService) ||
-    (step === 1 && (loadingHours || hoursLoadFailed)) ||
+    (step === 1 && (loadingHours || hoursLoadFailed || !date || !hour)) ||
+    (step === 2 && (!name.trim() || !phone.trim())) ||
     (step === STEPS.length - 1 && (submitting || !confirmReady));
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-40 pt-6 sm:px-6 sm:pb-44 sm:pt-10">
+    <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-10">
       <div className="animate-soft-in px-1 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose sm:text-sm">
           Reserva en línea
@@ -622,45 +623,33 @@ export default function Reservar() {
             {error}
           </p>
         )}
-      </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 px-4 py-3 shadow-[0_-8px_30px_rgba(26,18,20,0.08)] backdrop-blur-md sm:px-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
-          {selectedService && step > 0 && (
-            <p className="truncate text-center text-xs text-ink/55 sm:text-left">
-              {selectedService.name}
-              {date ? ` · ${date}` : ""}
-              {hour ? ` · ${hour}` : ""}
-            </p>
-          )}
-          <div className="flex gap-2">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={goBack}
-                className="btn-secondary shrink-0 px-4"
-              >
-                Atrás
-              </button>
-            )}
+        {/* Acciones dentro de la tarjeta: sin barra fija sobre el footer */}
+        {step > 0 && (
+          <div className="mt-6 flex flex-col gap-3 border-t border-ink/5 pt-5 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={goBack}
+              className="btn-secondary w-full sm:w-auto"
+            >
+              Atrás
+            </button>
             {step < STEPS.length - 1 ? (
               <button
                 type="button"
                 onClick={goNext}
                 disabled={primaryDisabled}
-                className="btn-primary min-w-0 flex-1 disabled:opacity-60"
+                className="btn-primary w-full disabled:opacity-60 sm:ml-auto sm:w-auto sm:min-w-[10rem]"
               >
-                {step === 0 && selectedService
-                  ? `Continuar con ${selectedService.name}`
-                  : "Continuar"}
+                Continuar
               </button>
             ) : (
-              <>
+              <div className="flex w-full flex-col gap-3 sm:ml-auto sm:w-auto sm:flex-row">
                 <button
                   type="button"
                   disabled={primaryDisabled}
                   onClick={handleConfirm}
-                  className="btn-primary min-w-0 flex-1 disabled:opacity-60"
+                  className="btn-primary w-full disabled:opacity-60 sm:min-w-[12rem]"
                 >
                   {submitting ? "Enviando…" : "Confirmar reserva"}
                 </button>
@@ -669,15 +658,15 @@ export default function Reservar() {
                     href={whatsappFallbackLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn-secondary shrink-0"
+                    className="btn-secondary w-full text-center sm:w-auto"
                   >
                     WhatsApp
                   </a>
                 )}
-              </>
+              </div>
             )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
