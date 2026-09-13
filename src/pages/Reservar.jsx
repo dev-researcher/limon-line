@@ -17,6 +17,7 @@ export default function Reservar() {
   const initialService = SALON.services.some((s) => s.name === preselected)
     ? preselected
     : "";
+
   const [step, setStep] = useState(initialService ? 1 : 0);
   const [serviceName, setServiceName] = useState(initialService);
   const [date, setDate] = useState("");
@@ -90,7 +91,7 @@ export default function Reservar() {
       }
 
       if (!cancelled) {
-        // Último recurso: mostrar horas del horario aunque no se lean reservas
+        // Mostrar horario aunque no se lean reservas
         setReservations([]);
         setHoursReady(true);
         setHoursLoadFailed(false);
@@ -104,10 +105,9 @@ export default function Reservar() {
     };
   }, [date, hoursRetryKey]);
 
-  // Al llegar al paso de pago: botón Confirmar limpio (sin error/WA de entrada).
-  // Además evita el "clic fantasma" del Continuar sobre el nuevo botón.
   useEffect(() => {
-    const cameToPayment = step === STEPS.length - 1 && prevStepRef.current !== step;
+    const cameToPayment =
+      step === STEPS.length - 1 && prevStepRef.current !== step;
     prevStepRef.current = step;
     if (!cameToPayment) return;
 
@@ -200,8 +200,24 @@ export default function Reservar() {
       setError("Completa tu nombre y apellido, y tu teléfono.");
       return;
     }
-    setSubmitFailed(false);
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goBack = () => {
+    setError("");
+    setSubmitFailed(false);
+    setStep((s) => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const selectService = (nextName) => {
+    setServiceName(nextName);
+    setError("");
+    window.setTimeout(() => {
+      setStep(1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 160);
   };
 
   const handleConfirm = async () => {
@@ -224,7 +240,6 @@ export default function Reservar() {
         hasProof: Boolean(proofFile),
       });
 
-      // El comprobante es opcional: si falla la subida, la reserva igual queda guardada.
       if (proofFile) {
         try {
           const proofUrl = await uploadProof(proofFile, reservationId);
@@ -254,12 +269,20 @@ export default function Reservar() {
     return (
       <div className="section-pad max-w-xl">
         <div className="animate-fade-up rounded-[2rem] border border-rose/20 bg-white/80 p-8 text-center shadow-sm backdrop-blur">
-          <p className="font-display text-4xl font-semibold text-ink">¡Reserva enviada!</p>
+          <p className="font-display text-4xl font-semibold text-ink">
+            ¡Reserva enviada!
+          </p>
           <p className="mt-4 text-ink/70">
-            Recibimos tu solicitud. Te confirmamos cuando verifiquemos el pago SINPE.
+            Recibimos tu solicitud. Te confirmamos cuando verifiquemos el pago
+            SINPE.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a href={whatsappConfirmLink} target="_blank" rel="noreferrer" className="btn-primary">
+            <a
+              href={whatsappConfirmLink}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-primary"
+            >
               Confirmar por WhatsApp
             </a>
             <Link to="/" className="btn-secondary">
@@ -271,21 +294,35 @@ export default function Reservar() {
     );
   }
 
+  const stepHint =
+    step === 0
+      ? "Toca un servicio: pasarás automáticamente a fecha y hora."
+      : step === 1
+        ? "Elige la fecha y luego la hora. Continuar queda fijo abajo."
+        : step === 2
+          ? "Completa tus datos. Continuar queda fijo abajo."
+          : "El comprobante es opcional. Confirma abajo cuando estés lista.";
+
+  const primaryDisabled =
+    (step === 0 && !selectedService) ||
+    (step === 1 && (loadingHours || hoursLoadFailed)) ||
+    (step === STEPS.length - 1 && submitting);
+
   return (
-    <div className="section-pad w-full max-w-3xl">
+    <div className="mx-auto w-full max-w-3xl px-4 pb-40 pt-6 sm:px-6 sm:pb-44 sm:pt-10">
       <div className="animate-soft-in px-1 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose sm:text-sm">
           Reserva en línea
         </p>
-        <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl md:text-5xl">
+        <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">
           Agenda tu cita
         </h1>
-        <p className="mt-3 text-sm text-ink/65 sm:text-base">
-          Adelanto de {formatColon(SALON.deposit)} por SINPE móvil para confirmar tu espacio.
+        <p className="mt-2 text-sm text-ink/65">
+          Adelanto de {formatColon(SALON.deposit)} por SINPE móvil.
         </p>
       </div>
 
-      <ol className="mt-8 flex flex-wrap items-center justify-center gap-1.5 sm:mt-10 sm:gap-2">
+      <ol className="mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:mt-6 sm:gap-2">
         {STEPS.map((label, i) => (
           <li
             key={label}
@@ -302,52 +339,67 @@ export default function Reservar() {
         ))}
       </ol>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
-        className="mt-6 space-y-5 rounded-3xl border border-ink/5 bg-white/75 p-4 shadow-sm backdrop-blur sm:mt-8 sm:space-y-6 sm:rounded-[2rem] sm:p-6 md:p-8"
-      >
+      <p className="mt-4 text-center text-sm font-medium text-ink/70">{stepHint}</p>
+
+      <div className="mt-4 rounded-3xl border border-ink/5 bg-white/80 p-4 shadow-sm backdrop-blur sm:mt-5 sm:rounded-[2rem] sm:p-6 md:p-8">
         {step === 0 && (
-          <div className="space-y-3 animate-fade-up">
-            <label className="label">Servicio</label>
-            <div className="max-h-[28rem] space-y-2 overflow-y-auto pr-1">
-              {SALON.services.map((s) => (
-                <button
-                  key={s.name}
-                  type="button"
-                  onClick={() => setServiceName(s.name)}
-                  className={`flex w-full items-center gap-3 rounded-2xl border p-2 text-left transition ${
-                    serviceName === s.name
-                      ? "border-rose bg-rose-mist/70"
-                      : "border-ink/10 hover:border-rose/40"
-                  }`}
-                >
-                  <img
-                    src={s.image}
-                    alt=""
-                    className="h-16 w-16 shrink-0 rounded-xl object-cover"
-                    width={64}
-                    height={64}
-                    loading="lazy"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="font-semibold text-ink">{s.name}</span>
-                      <span className="shrink-0 text-xs text-ink/45">
-                        {formatDuration(s.duration)}
-                      </span>
+          <div className="animate-fade-up space-y-3">
+            <div className="flex items-end justify-between gap-3">
+              <label className="label mb-0">¿Qué servicio quieres?</label>
+              <span className="text-xs text-ink/40">
+                {SALON.services.length} opciones
+              </span>
+            </div>
+            <div className="space-y-2">
+              {SALON.services.map((s) => {
+                const active = serviceName === s.name;
+                return (
+                  <button
+                    key={s.name}
+                    type="button"
+                    onClick={() => selectService(s.name)}
+                    className={`flex w-full items-center gap-3 rounded-2xl border p-2.5 text-left transition ${
+                      active
+                        ? "border-rose bg-rose-mist/70 ring-2 ring-rose/30"
+                        : "border-ink/10 hover:border-rose/40"
+                    }`}
+                  >
+                    <img
+                      src={s.image}
+                      alt=""
+                      className="h-14 w-14 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16"
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="font-semibold text-ink">{s.name}</span>
+                        <span className="shrink-0 text-xs text-ink/45">
+                          {formatDuration(s.duration)}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 line-clamp-1 text-sm text-ink/60 sm:line-clamp-2">
+                        {s.description}
+                      </p>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-ink/60">{s.description}</p>
-                  </div>
-                </button>
-              ))}
+                    <span
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        active ? "bg-rose text-white" : "bg-ink/5 text-ink/25"
+                      }`}
+                      aria-hidden
+                    >
+                      {active ? "✓" : ""}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
         {step === 1 && (
-          <div className="space-y-4 animate-fade-up">
+          <div className="animate-fade-up space-y-4">
             <div className="flex items-center gap-3 rounded-2xl bg-rose-mist/50 p-3 text-sm text-ink/70">
               {selectedService?.image && (
                 <img
@@ -358,13 +410,17 @@ export default function Reservar() {
                   height={56}
                 />
               )}
-              <p>
-                Servicio: <strong>{selectedService?.name}</strong> ·{" "}
-                {formatDuration(selectedService?.duration || 0)}
-              </p>
+              <div className="min-w-0">
+                <p>
+                  Servicio: <strong>{selectedService?.name}</strong>
+                </p>
+                <p className="text-ink/50">
+                  {formatDuration(selectedService?.duration || 0)}
+                </p>
+              </div>
             </div>
             <p className="text-sm text-ink/55">
-              Primero elige la fecha; luego podrás ver y seleccionar la hora disponible.
+              Primero elige la fecha; luego selecciona la hora disponible.
             </p>
             <div>
               <label className="label" htmlFor="date">
@@ -399,7 +455,8 @@ export default function Reservar() {
               ) : hoursLoadFailed ? (
                 <div className="space-y-3 rounded-2xl border border-rose/30 bg-rose-mist/50 px-4 py-3">
                   <p className="text-sm text-rose-deep">
-                    No se pudieron cargar las horas. Revisa tu conexión e intenta de nuevo.
+                    No se pudieron cargar las horas. Revisa tu conexión e intenta
+                    de nuevo.
                   </p>
                   <button
                     type="button"
@@ -413,48 +470,41 @@ export default function Reservar() {
                   </button>
                 </div>
               ) : (
-                <select
-                  id="hour"
-                  value={hour}
-                  onChange={(e) => {
-                    setHour(e.target.value);
-                    setError("");
-                  }}
-                  className="field"
-                  required
-                >
-                  <option value="">Selecciona una hora</option>
-                  <optgroup label="Mañana">
-                    {availableHours
-                      .filter((h) => parseInt(h.split(":")[0], 10) < 12)
-                      .map((h) => (
-                        <option key={h} value={h}>
-                          {h}
-                        </option>
-                      ))}
-                  </optgroup>
-                  <optgroup label="Tarde">
-                    {availableHours
-                      .filter((h) => parseInt(h.split(":")[0], 10) >= 12)
-                      .map((h) => (
-                        <option key={h} value={h}>
-                          {h}
-                        </option>
-                      ))}
-                  </optgroup>
-                </select>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {availableHours.map((h) => (
+                    <button
+                      key={h}
+                      type="button"
+                      onClick={() => {
+                        setHour(h);
+                        setError("");
+                      }}
+                      className={`rounded-xl border px-2 py-2.5 text-sm font-semibold transition ${
+                        hour === h
+                          ? "border-rose bg-rose text-white"
+                          : "border-ink/10 bg-white text-ink hover:border-rose/40"
+                      }`}
+                    >
+                      {h}
+                    </button>
+                  ))}
+                </div>
               )}
-              {date && !loadingHours && hoursReady && !hoursLoadFailed && availableHours.length === 0 && (
-                <p className="mt-2 text-sm text-rose-deep">
-                  No hay horas disponibles para esta fecha. Prueba otro día.
-                </p>
-              )}
+              {date &&
+                !loadingHours &&
+                hoursReady &&
+                !hoursLoadFailed &&
+                availableHours.length === 0 && (
+                  <p className="mt-2 text-sm text-rose-deep">
+                    No hay horas disponibles para esta fecha. Prueba otro día.
+                  </p>
+                )}
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="space-y-4 animate-fade-up">
+          <div className="animate-fade-up space-y-4">
             <div>
               <label className="label" htmlFor="name">
                 Nombre y apellido <span className="text-rose-deep">*</span>
@@ -471,7 +521,7 @@ export default function Reservar() {
             </div>
             <div>
               <label className="label" htmlFor="phone">
-                Teléfono / WhatsApp
+                Teléfono / WhatsApp <span className="text-rose-deep">*</span>
               </label>
               <input
                 id="phone"
@@ -487,13 +537,14 @@ export default function Reservar() {
         )}
 
         {step === 3 && (
-          <div className="space-y-5 animate-fade-up">
+          <div className="animate-fade-up space-y-5">
             <div className="rounded-2xl border border-rose/20 bg-rose-mist/40 p-3 text-sm leading-relaxed text-ink/80 sm:p-4">
               <p className="font-semibold text-ink">Instrucciones de pago</p>
               <p className="mt-2 break-words">
-                Transfiere <strong>{formatColon(SALON.deposit)}</strong> por SINPE móvil al número{" "}
-                <strong className="whitespace-nowrap">{SALON.sinpePhone}</strong> a nombre de{" "}
-                <strong>{SALON.sinpeName}</strong>.
+                Transfiere <strong>{formatColon(SALON.deposit)}</strong> por
+                SINPE móvil al número{" "}
+                <strong className="whitespace-nowrap">{SALON.sinpePhone}</strong>{" "}
+                a nombre de <strong>{SALON.sinpeName}</strong>.
               </p>
               <p className="mt-2 break-words">
                 En el detalle escribe tu nombre y apellido:{" "}
@@ -524,58 +575,67 @@ export default function Reservar() {
         )}
 
         {error && (
-          <p className="rounded-2xl border border-rose/30 bg-rose-mist/50 px-4 py-3 text-sm text-rose-deep">
+          <p className="mt-4 rounded-2xl border border-rose/30 bg-rose-mist/50 px-4 py-3 text-sm text-rose-deep">
             {error}
           </p>
         )}
+      </div>
 
-        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setError("");
-                setSubmitFailed(false);
-                setStep((s) => s - 1);
-              }}
-              className="btn-secondary w-full sm:w-auto"
-            >
-              Atrás
-            </button>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 px-4 py-3 shadow-[0_-8px_30px_rgba(26,18,20,0.08)] backdrop-blur-md sm:px-6">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
+          {selectedService && step > 0 && (
+            <p className="truncate text-center text-xs text-ink/55 sm:text-left">
+              {selectedService.name}
+              {date ? ` · ${date}` : ""}
+              {hour ? ` · ${hour}` : ""}
+            </p>
           )}
-          {step < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={step === 1 && (loadingHours || hoursLoadFailed)}
-              className="btn-primary w-full disabled:opacity-60 sm:w-auto"
-            >
-              Continuar
-            </button>
-          ) : (
-            <>
+          <div className="flex gap-2">
+            {step > 0 && (
               <button
                 type="button"
-                disabled={submitting}
-                onClick={handleConfirm}
-                className="btn-primary w-full disabled:opacity-60 sm:w-auto"
+                onClick={goBack}
+                className="btn-secondary shrink-0 px-4"
               >
-                {submitting ? "Enviando…" : "Confirmar reserva"}
+                Atrás
               </button>
-              {submitFailed && (
-                <a
-                  href={whatsappFallbackLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-secondary w-full sm:w-auto"
+            )}
+            {step < STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={primaryDisabled}
+                className="btn-primary min-w-0 flex-1 disabled:opacity-60"
+              >
+                {step === 0 && selectedService
+                  ? `Continuar con ${selectedService.name}`
+                  : "Continuar"}
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  disabled={primaryDisabled}
+                  onClick={handleConfirm}
+                  className="btn-primary min-w-0 flex-1 disabled:opacity-60"
                 >
-                  Hablar por WhatsApp
-                </a>
-              )}
-            </>
-          )}
+                  {submitting ? "Enviando…" : "Confirmar reserva"}
+                </button>
+                {submitFailed && (
+                  <a
+                    href={whatsappFallbackLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-secondary shrink-0"
+                  >
+                    WhatsApp
+                  </a>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
