@@ -7,7 +7,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { db, auth } from "../firebase/config";
 import { SALON } from "../data/salon";
 import { ensureBookingSession } from "./bookingAuth";
 
@@ -30,18 +30,31 @@ export async function getReservationsByDate(date) {
 }
 
 export async function getAllReservations() {
-  await ensureBookingSession();
-  const q = query(
-    collection(db, "reservations_db"),
-    where("businessId", "==", SALON.id)
-  );
-  const snapshot = await getDocs(q);
-  const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-  return rows.sort((a, b) => {
-    const da = `${a.date || ""} ${a.hour || a.time || ""}`;
-    const dbv = `${b.date || ""} ${b.hour || b.time || ""}`;
-    return dbv.localeCompare(da);
-  });
+  try {
+    // No forzar la cuenta técnica si ya hay admin logueado
+    if (!auth.currentUser) {
+      await ensureBookingSession();
+    }
+    const q = query(
+      collection(db, "reservations_db"),
+      where("businessId", "==", SALON.id)
+    );
+    const snapshot = await getDocs(q);
+    const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return rows.sort((a, b) => {
+      const da = `${a.date || ""} ${a.hour || a.time || ""}`;
+      const dbv = `${b.date || ""} ${b.hour || b.time || ""}`;
+      return dbv.localeCompare(da);
+    });
+  } catch (err) {
+    console.error("getAllReservations:", err?.code || err);
+    if (err?.code === "permission-denied") {
+      const e = new Error("permission-denied");
+      e.code = "permission-denied";
+      throw e;
+    }
+    throw err;
+  }
 }
 
 export async function createReservation(payload) {

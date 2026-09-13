@@ -23,8 +23,15 @@ export default function Admin() {
     try {
       const rows = await getAllReservations();
       setBookings(rows);
-    } catch {
-      setError("No se pudieron cargar las reservas.");
+    } catch (err) {
+      setBookings([]);
+      if (err?.code === "permission-denied") {
+        setError(
+          "Firebase no permite leer las reservas todavía (reglas sin publicar). Las citas sí se pueden guardar; para verlas aquí hay que publicar firestore.rules."
+        );
+      } else {
+        setError("No se pudieron cargar las reservas. Revisa tu conexión e intenta de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -141,8 +148,10 @@ export default function Admin() {
 
       {loading ? (
         <p className="py-12 text-center text-ink/50">Cargando reservas…</p>
-      ) : visible.length === 0 ? (
-        <p className="py-12 text-center text-ink/50">No hay reservas en este filtro.</p>
+      ) : error ? null : visible.length === 0 ? (
+        <p className="py-12 text-center text-ink/50">
+          No hay reservas por el momento.
+        </p>
       ) : (
         <div className="overflow-x-auto rounded-[1.5rem] border border-ink/5 bg-white/80">
           <table className="min-w-full text-left text-sm">

@@ -25,10 +25,15 @@ export default function Reportes() {
       if (rows.length && !selectedKey) {
         setSelectedKey(rows[0].monthKey);
       }
-    } catch {
-      setError(
-        "No se pudieron cargar los reportes. Verifica las reglas de Firebase y que hayas iniciado sesión."
-      );
+    } catch (err) {
+      setReports([]);
+      if (err?.code === "permission-denied") {
+        setError(
+          "No hay reportes visibles todavía: Firebase bloquea la lectura. Cuando se publiquen las reglas podrás verlos aquí."
+        );
+      } else {
+        setError("No se pudieron cargar los reportes. Revisa tu conexión e intenta de nuevo.");
+      }
     } finally {
       setLoading(false);
     }

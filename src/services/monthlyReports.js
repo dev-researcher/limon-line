@@ -112,14 +112,24 @@ export function buildMonthlyReportsFromReservations(reservations) {
 
 /** Lee reportes guardados en Firestore (consultables en cualquier momento). */
 export async function getSavedMonthlyReports() {
-  const q = query(
-    collection(db, "monthly_reports"),
-    where("businessId", "==", SALON.id)
-  );
-  const snapshot = await getDocs(q);
-  return snapshot.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (b.monthKey || "").localeCompare(a.monthKey || ""));
+  try {
+    const q = query(
+      collection(db, "monthly_reports"),
+      where("businessId", "==", SALON.id)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.monthKey || "").localeCompare(a.monthKey || ""));
+  } catch (err) {
+    console.error("getSavedMonthlyReports:", err?.code || err);
+    if (err?.code === "permission-denied") {
+      const e = new Error("permission-denied");
+      e.code = "permission-denied";
+      throw e;
+    }
+    throw err;
+  }
 }
 
 export async function getSavedMonthlyReport(monthKey) {
