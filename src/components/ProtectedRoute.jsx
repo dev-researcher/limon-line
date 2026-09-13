@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/config";
 
-const ADMIN_EMAILS = ["admin@aaglamstudio.com"];
+const ADMIN_EMAILS = ["elenaportuguez@icloud.com"];
 
 export default function ProtectedRoute({ children }) {
   const [ready, setReady] = useState(false);
